@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { Shield, Mail, Lock, User, AlertCircle, Info } from 'lucide-react'
+import { Shield, Mail, Lock, User, AlertCircle } from 'lucide-react'
 
 interface AuthFormProps {
   mode: 'login' | 'register'
@@ -16,62 +16,24 @@ export function AuthForm({ mode }: AuthFormProps) {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [debugInfo, setDebugInfo] = useState<string[]>([])
-
-  const addDebugInfo = (message: string) => {
-    console.log(message)
-    setDebugInfo(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`])
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setDebugInfo([])
     setLoading(true)
-
-    addDebugInfo('🚀 Form submission started')
-    addDebugInfo(`📝 Mode: ${mode}`)
-    addDebugInfo(`📧 Email: ${formData.email}`)
-    addDebugInfo(`👤 Username: ${formData.username}`)
 
     try {
       if (mode === 'login') {
-        addDebugInfo('🔑 Attempting login...')
         await signIn(formData.email, formData.password)
-        addDebugInfo('✅ Login successful')
       } else {
-        addDebugInfo('📝 Attempting registration...')
-        addDebugInfo('📋 User data prepared for signup')
-        
         await signUp(formData.email, formData.password, {
           username: formData.username,
           full_name: formData.fullName,
           role: 'user',
         })
-        addDebugInfo('✅ Registration successful')
       }
     } catch (err: any) {
-      console.error('💥 Form submission error:', err)
-      addDebugInfo(`❌ Error: ${err.message}`)
-      addDebugInfo(`🔍 Error code: ${err.code || 'No code'}`)
-      addDebugInfo(`📊 Error details: ${JSON.stringify(err.details || {})}`)
-      
-      let errorMessage = err.message || 'An unexpected error occurred'
-      
-      // Provide helpful error messages
-      if (err.message?.includes('Invalid login credentials')) {
-        errorMessage = 'Invalid email or password. Please check your credentials.'
-      } else if (err.message?.includes('Email not confirmed')) {
-        errorMessage = 'Please check your email and click the confirmation link.'
-      } else if (err.message?.includes('User already registered')) {
-        errorMessage = 'An account with this email already exists. Try signing in instead.'
-      } else if (err.message?.includes('relation "profiles" does not exist')) {
-        errorMessage = 'Database not set up. Please run the database migrations first.'
-      } else if (err.message?.includes('Missing Supabase environment variables')) {
-        errorMessage = 'Supabase not configured. Please set up your .env file.'
-      }
-      
-      setError(errorMessage)
+      setError(err.message)
     } finally {
       setLoading(false)
     }
@@ -197,29 +159,8 @@ export function AuthForm({ mode }: AuthFormProps) {
 
           {error && (
             <div className="bg-red-900/50 border border-red-500 rounded-lg p-4 flex items-center space-x-2">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-              <div className="flex-1">
-                <span className="text-red-300 text-sm">{error}</span>
-                <div className="text-xs text-red-400 mt-1">
-                  Check the browser console for detailed error logs
-                </div>
-              </div>
-            </div>
-          )}
-
-          {debugInfo.length > 0 && (
-            <div className="bg-blue-900/50 border border-blue-500 rounded-lg p-4">
-              <div className="flex items-center space-x-2 mb-2">
-                <Info className="w-4 h-4 text-blue-400" />
-                <span className="text-blue-300 text-sm font-medium">Debug Information</span>
-              </div>
-              <div className="max-h-32 overflow-y-auto">
-                {debugInfo.map((info, index) => (
-                  <div key={index} className="text-xs text-blue-200 font-mono">
-                    {info}
-                  </div>
-                ))}
-              </div>
+              <AlertCircle className="w-5 h-5 text-red-400" />
+              <span className="text-red-300 text-sm">{error}</span>
             </div>
           )}
 
