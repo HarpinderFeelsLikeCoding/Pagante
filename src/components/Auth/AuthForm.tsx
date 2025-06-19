@@ -22,18 +22,25 @@ export function AuthForm({ mode }: AuthFormProps) {
     setError('')
     setLoading(true)
 
+    console.log('🚀 Form submission started:', { mode, formData: { ...formData, password: '[HIDDEN]' } })
+
     try {
       if (mode === 'login') {
+        console.log('🔑 Attempting login...')
         await signIn(formData.email, formData.password)
+        console.log('✅ Login successful')
       } else {
+        console.log('📝 Attempting registration...')
         await signUp(formData.email, formData.password, {
           username: formData.username,
           full_name: formData.fullName,
           role: 'user',
         })
+        console.log('✅ Registration successful')
       }
     } catch (err: any) {
-      setError(err.message)
+      console.error('💥 Form submission error:', err)
+      setError(err.message || 'An unexpected error occurred')
     } finally {
       setLoading(false)
     }
@@ -160,7 +167,12 @@ export function AuthForm({ mode }: AuthFormProps) {
           {error && (
             <div className="bg-red-900/50 border border-red-500 rounded-lg p-4 flex items-center space-x-2">
               <AlertCircle className="w-5 h-5 text-red-400" />
-              <span className="text-red-300 text-sm">{error}</span>
+              <div className="flex-1">
+                <span className="text-red-300 text-sm">{error}</span>
+                <div className="text-xs text-red-400 mt-1">
+                  Check the browser console for detailed error logs
+                </div>
+              </div>
             </div>
           )}
 
