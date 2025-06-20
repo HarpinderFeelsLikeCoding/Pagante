@@ -56,16 +56,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchProfile = async (userId: string) => {
     try {
       console.log('Fetching profile for user:', userId)
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
+      
+      // Wait a bit for the trigger to complete if needed
+      let attempts = 0
+      let data = null
+      let error = null
+
+      while (attempts < 5) {
+        const result = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single()
+
+        data = result.data
+        error = result.error
+
+        if (!error && data) {
+          break
+        }
+
+        if (error && error.code !== 'PGRST116') {
+          // Not a "not found" error, so break
+          break
+        }
+
+        // Wait 500ms before retrying
+        await new Promise(resolve => setTimeout(resolve, 500))
+        attempts++
+      }
 
       if (error) {
         console.error('Error fetching profile:', error)
         throw error
       }
+      
       console.log('Profile fetched successfully:', data)
       setProfile(data)
     } catch (error) {
@@ -81,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('User data:', userData)
     
     try {
-      // First, try to sign up with Supabase Auth
+      // Sign up with Supabase Auth - the trigger should handle profile creation
       console.log('Calling supabase.auth.signUp...')
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -108,48 +133,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log('User created successfully:', data.user.id)
-
-      // Check if profile was created by trigger
-      console.log('Checking if profile was created by trigger...')
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', data.user.id)
-        .single()
-
-      console.log('Profile check result:', { profileData, profileError })
-
-      if (profileError && profileError.code === 'PGRST116') {
-        // Profile doesn't exist, create it manually
-        console.log('Profile not found, creating manually...')
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert([
-            {
-              id: data.user.id,
-              email: data.user.email!,
-              username: userData.username!,
-              full_name: userData.full_name!,
-              role: userData.role || 'user',
-            },
-          ])
-
-        console.log('Manual profile creation result:', { insertError })
-
-        if (insertError) {
-          console.error('Error creating profile manually:', insertError)
-          throw insertError
-        }
-      } else if (profileError) {
-        console.error('Unexpected profile error:', profileError)
-        throw profileError
-      }
-
       console.log('Signup process completed successfully')
 
     } catch (err: any) {
       console.error('Signup error:', err)
-      throw new Error(err.message || 'Failed to create account')
+      
+      // Provide more user-friendly error messages
+      let errorMessage = 'Failed to create account'
+      
+      if (err.message?.includes('duplicate key')) {
+        if (err.message.includes('username')) {
+          errorMessage = 'Username already exists. Please choose a different username.'
+        } else if (err.message.includes('email')) {
+          errorMessage = 'Email already exists. Please use a different email or try signing in.'
+        }
+      } else if (err.message?.includes('Database error')) {
+        errorMessage = 'There was a problem setting up your account. Please try again.'
+      } else if (err.message) {
+        errorMessage = err.message
+      }
+      
+      throw new Error(errorMessage)
     }
   }
 
