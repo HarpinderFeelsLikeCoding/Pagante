@@ -57,42 +57,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Fetching profile for user:', userId)
       
-      // Wait a bit for the trigger to complete if needed
-      let attempts = 0
-      let data = null
-      let error = null
-
-      while (attempts < 5) {
-        const result = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single()
-
-        data = result.data
-        error = result.error
-
-        if (!error && data) {
-          break
-        }
-
-        if (error && error.code !== 'PGRST116') {
-          // Not a "not found" error, so break
-          break
-        }
-
-        // Wait 500ms before retrying
-        await new Promise(resolve => setTimeout(resolve, 500))
-        attempts++
-      }
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
 
       if (error) {
         console.error('Error fetching profile:', error)
-        throw error
+        if (error.code === 'PGRST116') {
+          // Profile doesn't exist - this is expected for new users
+          console.log('Profile not found - this is normal for new users')
+          setProfile(null)
+        } else {
+          throw error
+        }
+      } else {
+        console.log('Profile fetched successfully:', data)
+        setProfile(data)
       }
-      
-      console.log('Profile fetched successfully:', data)
-      setProfile(data)
     } catch (error) {
       console.error('Error fetching profile:', error)
     } finally {
@@ -106,54 +89,68 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('User data:', userData)
     
     try {
-      // Sign up with Supabase Auth - the trigger should handle profile creation
-      console.log('Calling supabase.auth.signUp...')
-      const { data, error } = await supabase.auth.signUp({
+      // Step 1: Create the auth user (without trigger)
+      console.log('Creating auth user...')
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            username: userData.username,
-            full_name: userData.full_name,
-            role: userData.role || 'user'
-          }
-        }
       })
 
-      console.log('Supabase auth signup response:', { data, error })
-
-      if (error) {
-        console.error('Supabase auth signup error:', error)
-        throw error
+      if (authError) {
+        console.error('Auth signup error:', authError)
+        throw authError
       }
 
-      if (!data.user) {
-        console.error('No user returned from signup')
-        throw new Error('No user returned from signup')
+      if (!authData.user) {
+        throw new Error('No user returned from auth signup')
       }
 
-      console.log('User created successfully:', data.user.id)
+      console.log('Auth user created successfully:', authData.user.id)
+
+      // Step 2: Create the profile manually
+      console.log('Creating profile manually...')
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: authData.user.id,
+            email: authData.user.email!,
+            username: userData.username!,
+            full_name: userData.full_name!,
+            role: userData.role || 'user',
+          },
+        ])
+        .select()
+        .single()
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError)
+        
+        // If profile creation fails, we should clean up the auth user
+        // But Supabase doesn't allow us to delete users from client side
+        // So we'll just throw the error with a helpful message
+        
+        if (profileError.code === '23505') {
+          // Unique constraint violation
+          if (profileError.message.includes('username')) {
+            throw new Error('Username already exists. Please choose a different username.')
+          } else if (profileError.message.includes('email')) {
+            throw new Error('Email already exists. Please use a different email.')
+          }
+        }
+        
+        throw new Error('Failed to create user profile. Please try again.')
+      }
+
+      console.log('Profile created successfully:', profileData)
       console.log('Signup process completed successfully')
+
+      // Set the profile in state
+      setProfile(profileData)
 
     } catch (err: any) {
       console.error('Signup error:', err)
-      
-      // Provide more user-friendly error messages
-      let errorMessage = 'Failed to create account'
-      
-      if (err.message?.includes('duplicate key')) {
-        if (err.message.includes('username')) {
-          errorMessage = 'Username already exists. Please choose a different username.'
-        } else if (err.message.includes('email')) {
-          errorMessage = 'Email already exists. Please use a different email or try signing in.'
-        }
-      } else if (err.message?.includes('Database error')) {
-        errorMessage = 'There was a problem setting up your account. Please try again.'
-      } else if (err.message) {
-        errorMessage = err.message
-      }
-      
-      throw new Error(errorMessage)
+      throw err
     }
   }
 

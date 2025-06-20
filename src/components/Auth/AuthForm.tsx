@@ -26,14 +26,29 @@ export function AuthForm({ mode }: AuthFormProps) {
       if (mode === 'login') {
         await signIn(formData.email, formData.password)
       } else {
+        // Validate required fields for registration
+        if (!formData.username.trim()) {
+          throw new Error('Username is required')
+        }
+        if (!formData.fullName.trim()) {
+          throw new Error('Full name is required')
+        }
+        if (formData.username.length < 3) {
+          throw new Error('Username must be at least 3 characters long')
+        }
+        if (formData.password.length < 6) {
+          throw new Error('Password must be at least 6 characters long')
+        }
+
         await signUp(formData.email, formData.password, {
-          username: formData.username,
-          full_name: formData.fullName,
+          username: formData.username.trim(),
+          full_name: formData.fullName.trim(),
           role: 'user',
         })
       }
     } catch (err: any) {
-      setError(err.message)
+      console.error('Auth error:', err)
+      setError(err.message || 'An unexpected error occurred')
     } finally {
       setLoading(false)
     }
@@ -103,7 +118,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                       type="text"
                       required
                       className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent"
-                      placeholder="Username"
+                      placeholder="Username (min 3 characters)"
                       value={formData.username}
                       onChange={handleChange}
                     />
@@ -149,7 +164,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                   required
                   className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent"
-                  placeholder="Password"
+                  placeholder={mode === 'register' ? 'Password (min 6 characters)' : 'Password'}
                   value={formData.password}
                   onChange={handleChange}
                 />
@@ -159,7 +174,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
           {error && (
             <div className="bg-red-900/50 border border-red-500 rounded-lg p-4 flex items-center space-x-2">
-              <AlertCircle className="w-5 h-5 text-red-400" />
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
               <span className="text-red-300 text-sm">{error}</span>
             </div>
           )}
@@ -171,7 +186,10 @@ export function AuthForm({ mode }: AuthFormProps) {
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-700 hover:to-gold-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-50 transition-all duration-300"
             >
               {loading ? (
-                'Processing...'
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Processing...</span>
+                </div>
               ) : (
                 mode === 'login' ? 'Sign In' : 'Create Account'
               )}
