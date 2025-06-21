@@ -19,15 +19,29 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'pagante-web'
+    }
   }
 })
 
-// Test the connection
+// Test the connection with better error handling
 supabase.auth.getSession().then(({ data, error }) => {
   if (error) {
     console.error('Supabase connection test failed:', error)
   } else {
     console.log('Supabase connection test successful')
+    
+    // Test database connection
+    supabase.from('profiles').select('count').limit(1).then(({ error: dbError }) => {
+      if (dbError) {
+        console.error('Database connection test failed:', dbError)
+      } else {
+        console.log('Database connection test successful')
+      }
+    })
   }
 })
 

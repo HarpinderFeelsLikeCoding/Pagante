@@ -26,13 +26,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
-  const [profileFetched, setProfileFetched] = useState(false)
 
   useEffect(() => {
     let mounted = true
 
     const initializeAuth = async () => {
       try {
+        console.log('Initializing auth...')
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
@@ -70,10 +70,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (!mounted) return
 
+      // Don't refetch profile on token refresh
+      if (event === 'TOKEN_REFRESHED') {
+        return
+      }
+
       setUser(session?.user ?? null)
-      setProfileFetched(false)
       
-      if (session?.user && event !== 'TOKEN_REFRESHED') {
+      if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
         await fetchProfile(session.user.id)
       } else {
         setProfile(null)
@@ -88,20 +92,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const fetchProfile = async (userId: string) => {
-    if (profileFetched) return
-    
     try {
       console.log('Fetching profile for user:', userId)
       
-      const { data, error } = await supabase
+      // Add a timeout to prevent infinite hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 10000)
+      })
+
+      const fetchPromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .maybeSingle()
 
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any
+
       if (error) {
         console.error('Error fetching profile:', error)
-        setProfile(null)
+        if (error.code === 'PGRST116') {
+          console.log('Profile not found - user may need to complete registration')
+          setProfile(null)
+        } else {
+          console.error('Database error:', error.message)
+          setProfile(null)
+        }
       } else if (data) {
         console.log('Profile found:', data.username)
         setProfile(data)
@@ -109,20 +124,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('No profile found for user')
         setProfile(null)
       }
-      
-      setProfileFetched(true)
     } catch (error) {
       console.error('Unexpected error fetching profile:', error)
       setProfile(null)
-      setProfileFetched(true)
     } finally {
+      console.log('Setting loading to false')
       setLoading(false)
     }
   }
 
   const refreshProfile = async () => {
     if (user) {
-      setProfileFetched(false)
+      setLoading(true)
       await fetchProfile(user.id)
     }
   }
@@ -131,6 +144,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('Starting signup process for:', email)
     
     try {
+      setLoading(true)
+      
       // Step 1: Create the auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -179,11 +194,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('Profile created successfully')
       setProfile(profileData)
-      setProfileFetched(true)
 
     } catch (err: any) {
       console.error('Signup error:', err)
       throw err
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -231,7 +247,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       setProfile(null)
-      setProfileFetched(false)
+      setUser(null)
+      setLoading(false)
       console.log('Sign out successful')
     } catch (error) {
       console.error('Sign out error:', error)
