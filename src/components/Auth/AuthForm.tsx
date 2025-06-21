@@ -8,7 +8,7 @@ interface AuthFormProps {
 }
 
 export function AuthForm({ mode }: AuthFormProps) {
-  const { signIn, signUp } = useAuth()
+  const { signIn, signUp, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: '',
@@ -68,6 +68,9 @@ export function AuthForm({ mode }: AuthFormProps) {
     })
   }
 
+  // Show loading state if auth is processing
+  const isLoading = loading || authLoading
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-navy-900 via-navy-800 to-blue-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -103,7 +106,8 @@ export function AuthForm({ mode }: AuthFormProps) {
                       name="fullName"
                       type="text"
                       required
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent"
+                      disabled={isLoading}
+                      className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent disabled:opacity-50"
                       placeholder="Full Name"
                       value={formData.fullName}
                       onChange={handleChange}
@@ -124,7 +128,8 @@ export function AuthForm({ mode }: AuthFormProps) {
                       name="username"
                       type="text"
                       required
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent"
+                      disabled={isLoading}
+                      className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent disabled:opacity-50"
                       placeholder="Username (min 3 characters)"
                       value={formData.username}
                       onChange={handleChange}
@@ -148,7 +153,8 @@ export function AuthForm({ mode }: AuthFormProps) {
                   type="email"
                   autoComplete="email"
                   required
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent"
+                  disabled={isLoading}
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent disabled:opacity-50"
                   placeholder="Email address"
                   value={formData.email}
                   onChange={handleChange}
@@ -170,7 +176,8 @@ export function AuthForm({ mode }: AuthFormProps) {
                   type="password"
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                   required
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent"
+                  disabled={isLoading}
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:border-transparent disabled:opacity-50"
                   placeholder={mode === 'register' ? 'Password (min 6 characters)' : 'Password'}
                   value={formData.password}
                   onChange={handleChange}
@@ -189,10 +196,10 @@ export function AuthForm({ mode }: AuthFormProps) {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={isLoading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-gold-600 to-gold-700 hover:from-gold-700 hover:to-gold-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gold-500 disabled:opacity-50 transition-all duration-300"
             >
-              {loading ? (
+              {isLoading ? (
                 <div className="flex items-center space-x-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   <span>Processing...</span>

@@ -8,16 +8,16 @@ import { SubscriptionTiers } from '../components/Subscriptions/SubscriptionTiers
 import { BarChart, Users, DollarSign, Eye, Plus, Settings } from 'lucide-react'
 
 export function CreatorDashboard() {
-  const { profile } = useAuth()
+  const { profile, loading: authLoading } = useAuth()
   const [creator, setCreator] = useState<Creator | null>(null)
   const [activeTab, setActiveTab] = useState('content')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (profile) {
+    if (profile && !authLoading) {
       loadCreatorProfile()
     }
-  }, [profile])
+  }, [profile, authLoading])
 
   const loadCreatorProfile = async () => {
     if (!profile) return
@@ -71,12 +71,30 @@ export function CreatorDashboard() {
     { label: 'Engagement Rate', value: '8.4%', change: '+2%', color: 'text-green-600' },
   ]
 
-  if (loading) {
+  // Show loading while auth is loading or while we're fetching creator data
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <div className="text-gray-600">Loading dashboard...</div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show message if no profile is found
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-gray-600 text-lg mb-2">Please log in to access your dashboard</div>
+          <a
+            href="/login"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Go to Login
+          </a>
         </div>
       </div>
     )
@@ -104,7 +122,7 @@ export function CreatorDashboard() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Creator Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {profile?.full_name}!</p>
+          <p className="text-gray-600">Welcome back, {profile.full_name}!</p>
         </div>
 
         {/* Stats */}
