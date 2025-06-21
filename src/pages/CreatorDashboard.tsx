@@ -5,19 +5,27 @@ import { ContentCreator } from '../components/Content/ContentCreator'
 import { ContentFeed } from '../components/Content/ContentFeed'
 import { LiveStreamManager } from '../components/Streaming/LiveStreamManager'
 import { SubscriptionTiers } from '../components/Subscriptions/SubscriptionTiers'
-import { BarChart, Users, DollarSign, Eye, Plus, Settings } from 'lucide-react'
+import { BarChart, Users, DollarSign, Eye, Settings, TrendingUp, Heart, MessageCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 export function CreatorDashboard() {
-  const { profile, loading: authLoading } = useAuth()
+  const { profile, loading: authLoading, user } = useAuth()
+  const navigate = useNavigate()
   const [creator, setCreator] = useState<Creator | null>(null)
-  const [activeTab, setActiveTab] = useState('content')
+  const [activeTab, setActiveTab] = useState('overview')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Redirect to login if not authenticated
+    if (!authLoading && !user) {
+      navigate('/login')
+      return
+    }
+
     if (profile && !authLoading) {
       loadCreatorProfile()
     }
-  }, [profile, authLoading])
+  }, [profile, authLoading, user, navigate])
 
   const loadCreatorProfile = async () => {
     if (!profile) return
@@ -57,18 +65,26 @@ export function CreatorDashboard() {
   }
 
   const tabs = [
-    { id: 'content', label: 'Content', icon: BarChart },
+    { id: 'overview', label: 'Overview', icon: BarChart },
+    { id: 'content', label: 'Content', icon: MessageCircle },
     { id: 'streams', label: 'Live Streams', icon: Users },
     { id: 'subscriptions', label: 'Subscriptions', icon: DollarSign },
-    { id: 'analytics', label: 'Analytics', icon: Eye },
+    { id: 'analytics', label: 'Analytics', icon: TrendingUp },
     { id: 'settings', label: 'Settings', icon: Settings },
   ]
 
   const stats = [
-    { label: 'Total Subscribers', value: '1,234', change: '+12%', color: 'text-green-600' },
-    { label: 'Monthly Revenue', value: '$2,456', change: '+8%', color: 'text-green-600' },
-    { label: 'Content Views', value: '45.2K', change: '+15%', color: 'text-green-600' },
-    { label: 'Engagement Rate', value: '8.4%', change: '+2%', color: 'text-green-600' },
+    { label: 'Total Subscribers', value: '1,234', change: '+12%', color: 'text-green-600', icon: Users },
+    { label: 'Monthly Revenue', value: '$2,456', change: '+8%', color: 'text-green-600', icon: DollarSign },
+    { label: 'Content Views', value: '45.2K', change: '+15%', color: 'text-green-600', icon: Eye },
+    { label: 'Engagement Rate', value: '8.4%', change: '+2%', color: 'text-green-600', icon: Heart },
+  ]
+
+  const recentActivity = [
+    { type: 'subscription', user: 'Alice Johnson', action: 'subscribed to Premium tier', time: '2 hours ago' },
+    { type: 'content', user: 'Bob Smith', action: 'liked your video "Getting Started"', time: '4 hours ago' },
+    { type: 'comment', user: 'Carol Davis', action: 'commented on your post', time: '6 hours ago' },
+    { type: 'stream', user: 'David Wilson', action: 'joined your live stream', time: '1 day ago' },
   ]
 
   // Show loading while auth is loading or while we're fetching creator data
@@ -89,12 +105,12 @@ export function CreatorDashboard() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-gray-600 text-lg mb-2">Please log in to access your dashboard</div>
-          <a
-            href="/login"
+          <button
+            onClick={() => navigate('/login')}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Go to Login
-          </a>
+          </button>
         </div>
       </div>
     )
@@ -127,26 +143,36 @@ export function CreatorDashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-lg p-6">
-              <div className="text-sm font-medium text-gray-600">{stat.label}</div>
-              <div className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</div>
-              <div className={`text-sm ${stat.color} mt-1`}>{stat.change} from last month</div>
-            </div>
-          ))}
+          {stats.map((stat, index) => {
+            const IconComponent = stat.icon
+            return (
+              <div key={index} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-medium text-gray-600">{stat.label}</div>
+                    <div className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</div>
+                    <div className={`text-sm ${stat.color} mt-1`}>{stat.change} from last month</div>
+                  </div>
+                  <div className="p-3 bg-blue-100 rounded-full">
+                    <IconComponent className="w-6 h-6 text-blue-600" />
+                  </div>
+                </div>
+              </div>
+            )
+          })}
         </div>
 
         {/* Tabs */}
         <div className="bg-white rounded-xl shadow-lg mb-8">
           <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
+            <nav className="flex space-x-8 px-6 overflow-x-auto">
               {tabs.map((tab) => {
                 const IconComponent = tab.icon
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm ${
+                    className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                       activeTab === tab.id
                         ? 'border-blue-500 text-blue-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -161,6 +187,72 @@ export function CreatorDashboard() {
           </div>
 
           <div className="p-6">
+            {activeTab === 'overview' && (
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Quick Actions */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                    <div className="space-y-3">
+                      <button
+                        onClick={() => setActiveTab('content')}
+                        className="w-full bg-white text-left p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200"
+                      >
+                        <div className="font-medium text-gray-900">Create New Content</div>
+                        <div className="text-sm text-gray-600">Share your latest work with subscribers</div>
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('streams')}
+                        className="w-full bg-white text-left p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200"
+                      >
+                        <div className="font-medium text-gray-900">Schedule Live Stream</div>
+                        <div className="text-sm text-gray-600">Connect with your audience in real-time</div>
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('subscriptions')}
+                        className="w-full bg-white text-left p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200"
+                      >
+                        <div className="font-medium text-gray-900">Manage Subscription Tiers</div>
+                        <div className="text-sm text-gray-600">Update pricing and benefits</div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Recent Activity */}
+                  <div className="bg-white rounded-xl border border-gray-200 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+                    <div className="space-y-4">
+                      {recentActivity.map((activity, index) => (
+                        <div key={index} className="flex items-start space-x-3">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                          <div className="flex-1">
+                            <div className="text-sm text-gray-900">
+                              <span className="font-medium">{activity.user}</span> {activity.action}
+                            </div>
+                            <div className="text-xs text-gray-500">{activity.time}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent Content Preview */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Recent Content</h3>
+                    <button
+                      onClick={() => setActiveTab('content')}
+                      className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                    >
+                      View All
+                    </button>
+                  </div>
+                  <ContentFeed creatorId={creator.id} limit={3} />
+                </div>
+              </div>
+            )}
+
             {activeTab === 'content' && (
               <div className="space-y-8">
                 <ContentCreator 
@@ -181,7 +273,7 @@ export function CreatorDashboard() {
 
             {activeTab === 'analytics' && (
               <div className="text-center py-12">
-                <BarChart className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Analytics Coming Soon</h3>
                 <p className="text-gray-600">Detailed analytics and insights will be available here.</p>
               </div>
@@ -191,8 +283,23 @@ export function CreatorDashboard() {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Creator Settings</h3>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-gray-600">Creator settings panel coming soon...</p>
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Creator Description
+                        </label>
+                        <textarea
+                          rows={4}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Tell your audience about yourself..."
+                          defaultValue={creator.description}
+                        />
+                      </div>
+                      <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                        Save Changes
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

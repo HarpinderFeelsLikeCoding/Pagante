@@ -1,10 +1,11 @@
 import React from 'react'
-import { Shield, Users, Scale, Crown, User, BarChart } from 'lucide-react'
+import { Shield, Users, Scale, Crown, User, BarChart, LogOut } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 export function Header() {
-  const { profile, signOut } = useAuth()
+  const { profile, signOut, loading } = useAuth()
+  const navigate = useNavigate()
 
   const getBranchIcon = (role: string) => {
     switch (role) {
@@ -18,6 +19,15 @@ export function Header() {
         return <User className="w-5 h-5 text-green-500" />
       default:
         return <Shield className="w-5 h-5 text-gray-500" />
+    }
+  }
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      navigate('/')
+    } catch (error) {
+      console.error('Error signing out:', error)
     }
   }
 
@@ -47,7 +57,9 @@ export function Header() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {profile ? (
+            {loading ? (
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gold-400"></div>
+            ) : profile ? (
               <>
                 <Link
                   to="/dashboard"
@@ -61,10 +73,11 @@ export function Header() {
                   <span className="text-sm font-medium">{profile.username}</span>
                 </div>
                 <button
-                  onClick={signOut}
-                  className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                  onClick={handleSignOut}
+                  className="flex items-center space-x-1 bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md text-sm font-medium transition-colors"
                 >
-                  Sign Out
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Sign Out</span>
                 </button>
               </>
             ) : (
