@@ -27,8 +27,16 @@ function App() {
               <Route path="/governance" element={<Governance />} />
               <Route path="/dashboard" element={<CreatorDashboard />} />
               <Route path="/creator/:username" element={<CreatorProfile />} />
-              {/* Catch-all route for 404s */}
-              <Route path="*" element={<Home />} />
+              {/* Catch-all route for unmatched paths - redirect to home */}
+              <Route path="*" element={<div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                  <h1 className="text-2xl font-bold text-gray-900 mb-4">Page Not Found</h1>
+                  <p className="text-gray-600 mb-6">The page you're looking for doesn't exist.</p>
+                  <a href="/" className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    Go Home
+                  </a>
+                </div>
+              </div>} />
             </Routes>
           </main>
           <Footer />

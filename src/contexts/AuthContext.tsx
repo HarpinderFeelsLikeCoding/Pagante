@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('User data:', userData)
     
     try {
-      // Step 1: Create the auth user (without trigger)
+      // Step 1: Create the auth user
       console.log('Creating auth user...')
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -126,10 +126,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (profileError) {
         console.error('Profile creation error:', profileError)
         
-        // If profile creation fails, we should clean up the auth user
-        // But Supabase doesn't allow us to delete users from client side
-        // So we'll just throw the error with a helpful message
-        
         if (profileError.code === '23505') {
           // Unique constraint violation
           if (profileError.message.includes('username')) {
@@ -155,17 +151,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signIn = async (email: string, password: string) => {
-    console.log('Signing in user:', email)
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    console.log('Attempting to sign in user:', email)
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    if (error) {
-      console.error('Sign in error:', error)
-      throw error
+      if (error) {
+        console.error('Sign in error:', error)
+        
+        // Provide more specific error messages
+        if (error.message.includes('Invalid login credentials')) {
+          throw new Error('Invalid email or password. Please check your credentials and try again.')
+        } else if (error.message.includes('Email not confirmed')) {
+          throw new Error('Please check your email and click the confirmation link before signing in.')
+        } else {
+          throw new Error(error.message)
+        }
+      }
+
+      if (!data.user) {
+        throw new Error('No user data returned from sign in')
+      }
+
+      console.log('Sign in successful for user:', data.user.id)
+      
+      // The auth state change listener will handle fetching the profile
+      
+    } catch (err: any) {
+      console.error('Sign in error:', err)
+      throw err
     }
-    console.log('Sign in successful')
   }
 
   const signOut = async () => {

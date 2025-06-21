@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { Shield, Mail, Lock, User, AlertCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 interface AuthFormProps {
   mode: 'login' | 'register'
@@ -8,6 +9,7 @@ interface AuthFormProps {
 
 export function AuthForm({ mode }: AuthFormProps) {
   const { signIn, signUp } = useAuth()
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -25,6 +27,8 @@ export function AuthForm({ mode }: AuthFormProps) {
     try {
       if (mode === 'login') {
         await signIn(formData.email, formData.password)
+        // Redirect to dashboard after successful login
+        navigate('/dashboard')
       } else {
         // Validate required fields for registration
         if (!formData.username.trim()) {
@@ -45,6 +49,9 @@ export function AuthForm({ mode }: AuthFormProps) {
           full_name: formData.fullName.trim(),
           role: 'user',
         })
+        
+        // Redirect to dashboard after successful registration
+        navigate('/dashboard')
       }
     } catch (err: any) {
       console.error('Auth error:', err)
