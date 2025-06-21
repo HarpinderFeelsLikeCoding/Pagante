@@ -13,7 +13,10 @@ import { CreatorProfile } from './pages/CreatorProfile'
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router future={{ 
+        v7_startTransition: true,
+        v7_relativeSplatPath: true 
+      }}>
         <div className="min-h-screen flex flex-col">
           <Header />
           <main className="flex-1">
@@ -24,6 +27,8 @@ function App() {
               <Route path="/governance" element={<Governance />} />
               <Route path="/dashboard" element={<CreatorDashboard />} />
               <Route path="/creator/:username" element={<CreatorProfile />} />
+              {/* Catch-all route for 404s */}
+              <Route path="*" element={<Home />} />
             </Routes>
           </main>
           <Footer />
