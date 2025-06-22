@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Plus, Image, Video, Headphones, Radio, Download, BarChart, MessageCircle, BookOpen, FileText } from 'lucide-react'
+import { Plus, Image, Video, Headphones, Radio, Download, BarChart, MessageCircle, BookOpen, FileText, AlertCircle, CheckCircle } from 'lucide-react'
 import { contentService, type ContentType, type TierType } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -12,13 +12,15 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
   const { profile } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     content_type: 'text_post' as ContentType,
     content_data: {},
     tier_required: 'free' as TierType,
-    tags: [] as string[],
+    tags: '',
     scheduled_publish_at: '',
   })
 
@@ -43,30 +45,64 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!profile) return
+    if (!profile) {
+      setError('You must be logged in to create content')
+      return
+    }
 
     setLoading(true)
-    try {
-      await contentService.createContent({
-        ...formData,
-        creator_id: creatorId,
-        is_published: !formData.scheduled_publish_at,
-        content_data: getContentData(),
-      })
+    setError('')
+    setSuccess('')
 
+    try {
+      console.log('Creating content with data:', formData)
+
+      // Parse hashtags from the tags string
+      const parsedTags = formData.tags
+        .split(/[\s,]+/)
+        .map(tag => tag.replace(/^#/, '').trim())
+        .filter(tag => tag.length > 0)
+
+      const contentData = {
+        creator_id: creatorId,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        content_type: formData.content_type,
+        content_data: getContentData(),
+        tier_required: formData.tier_required,
+        tags: parsedTags,
+        is_published: !formData.scheduled_publish_at,
+        scheduled_publish_at: formData.scheduled_publish_at || null,
+      }
+
+      console.log('Processed content data:', contentData)
+
+      const result = await contentService.createContent(contentData)
+      console.log('Content created successfully:', result)
+
+      setSuccess('Content created successfully!')
+      
+      // Reset form
       setFormData({
         title: '',
         description: '',
         content_type: 'text_post',
         content_data: {},
         tier_required: 'free',
-        tags: [],
+        tags: '',
         scheduled_publish_at: '',
       })
-      setIsOpen(false)
-      onContentCreated?.()
-    } catch (error) {
+      
+      // Close form after a delay
+      setTimeout(() => {
+        setIsOpen(false)
+        setSuccess('')
+        onContentCreated?.()
+      }, 2000)
+
+    } catch (error: any) {
       console.error('Error creating content:', error)
+      setError(error.message || 'Failed to create content. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -99,6 +135,10 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
           options: formData.content_data.options || [],
           multiple_choice: formData.content_data.multiple_choice || false
         }
+      case 'discussion':
+        return {
+          discussion_prompt: formData.content_data.discussion_prompt || ''
+        }
       default:
         return formData.content_data
     }
@@ -115,13 +155,16 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
             </label>
             <textarea
               rows={6}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
               placeholder="Write your content here..."
               value={formData.content_data.text || ''}
               onChange={(e) => setFormData({
                 ...formData,
                 content_data: { ...formData.content_data, text: e.target.value }
               })}
+              spellCheck="true"
+              autoCorrect="on"
+              autoCapitalize="sentences"
             />
           </div>
         )
@@ -142,6 +185,7 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
                   ...formData,
                   content_data: { ...formData.content_data, image_url: e.target.value }
                 })}
+                spellCheck="false"
               />
             </div>
             <div>
@@ -157,6 +201,9 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
                   ...formData,
                   content_data: { ...formData.content_data, alt_text: e.target.value }
                 })}
+                spellCheck="true"
+                autoCorrect="on"
+                autoCapitalize="sentences"
               />
             </div>
           </div>
@@ -178,6 +225,7 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
                   ...formData,
                   content_data: { ...formData.content_data, video_url: e.target.value }
                 })}
+                spellCheck="false"
               />
             </div>
             <div>
@@ -193,6 +241,7 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
                   ...formData,
                   content_data: { ...formData.content_data, thumbnail_url: e.target.value }
                 })}
+                spellCheck="false"
               />
             </div>
           </div>
@@ -214,6 +263,9 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
                   ...formData,
                   content_data: { ...formData.content_data, question: e.target.value }
                 })}
+                spellCheck="true"
+                autoCorrect="on"
+                autoCapitalize="sentences"
               />
             </div>
             <div>
@@ -232,8 +284,33 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
                     options: e.target.value.split('\n').filter(opt => opt.trim())
                   }
                 })}
+                spellCheck="true"
+                autoCorrect="on"
+                autoCapitalize="sentences"
               />
             </div>
+          </div>
+        )
+
+      case 'discussion':
+        return (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Discussion Prompt
+            </label>
+            <textarea
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="What would you like to discuss with your community?"
+              value={formData.content_data.discussion_prompt || ''}
+              onChange={(e) => setFormData({
+                ...formData,
+                content_data: { ...formData.content_data, discussion_prompt: e.target.value }
+              })}
+              spellCheck="true"
+              autoCorrect="on"
+              autoCapitalize="sentences"
+            />
           </div>
         )
 
@@ -256,6 +333,7 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
                   // Invalid JSON, ignore
                 }
               }}
+              spellCheck="false"
             />
           </div>
         )
@@ -266,7 +344,7 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 flex items-center justify-center space-x-2"
+        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
       >
         <Plus className="w-5 h-5" />
         <span>Create New Content</span>
@@ -275,16 +353,34 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-bold text-gray-900">Create New Content</h3>
         <button
-          onClick={() => setIsOpen(false)}
-          className="text-gray-500 hover:text-gray-700"
+          onClick={() => {
+            setIsOpen(false)
+            setError('')
+            setSuccess('')
+          }}
+          className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
         >
           ×
         </button>
       </div>
+
+      {error && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-2">
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+          <span className="text-red-700 text-sm">{error}</span>
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center space-x-2">
+          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+          <span className="text-green-700 text-sm">{success}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -324,6 +420,9 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
             placeholder="Enter content title..."
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            spellCheck="true"
+            autoCorrect="on"
+            autoCapitalize="words"
           />
         </div>
 
@@ -337,6 +436,9 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
             placeholder="Brief description..."
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            spellCheck="true"
+            autoCorrect="on"
+            autoCapitalize="sentences"
           />
         </div>
 
@@ -368,18 +470,20 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Tags (comma separated)
+            Tags
           </label>
           <input
             type="text"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="tag1, tag2, tag3"
-            value={formData.tags.join(', ')}
-            onChange={(e) => setFormData({
-              ...formData,
-              tags: e.target.value.split(',').map(tag => tag.trim()).filter(Boolean)
-            })}
+            placeholder="#tag1 #tag2 #tag3 or tag1, tag2, tag3"
+            value={formData.tags}
+            onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+            spellCheck="false"
+            autoCorrect="off"
           />
+          <div className="text-xs text-gray-500 mt-1">
+            Use hashtags (#tag) or separate with commas
+          </div>
         </div>
 
         <div>
@@ -397,17 +501,29 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
         <div className="flex space-x-4">
           <button
             type="button"
-            onClick={() => setIsOpen(false)}
+            onClick={() => {
+              setIsOpen(false)
+              setError('')
+              setSuccess('')
+            }}
             className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            disabled={loading}
           >
             Cancel
           </button>
           <button
             type="submit"
-            disabled={loading}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50"
+            disabled={loading || !formData.title.trim()}
+            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creating...' : 'Create Content'}
+            {loading ? (
+              <div className="flex items-center justify-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Creating...</span>
+              </div>
+            ) : (
+              'Create Content'
+            )}
           </button>
         </div>
       </form>
