@@ -189,6 +189,8 @@ export interface CreatorEarnings {
 // Helper functions for content management
 export const contentService = {
   async getCreatorContent(creatorId: string, limit = 20) {
+    console.log('Getting creator content for:', creatorId)
+    
     const { data, error } = await supabase
       .from('content')
       .select('*')
@@ -197,22 +199,61 @@ export const contentService = {
       .order('created_at', { ascending: false })
       .limit(limit)
 
-    if (error) throw error
-    return data
+    if (error) {
+      console.error('Error fetching creator content:', error)
+      throw error
+    }
+    
+    console.log('Fetched content:', data)
+    return data || []
   },
 
-  async createContent(content: Partial<Content>) {
+  async createContent(contentData: Partial<Content>) {
+    console.log('Creating content with data:', contentData)
+    
+    // Validate required fields
+    if (!contentData.creator_id) {
+      throw new Error('Creator ID is required')
+    }
+    if (!contentData.title?.trim()) {
+      throw new Error('Title is required')
+    }
+    if (!contentData.content_type) {
+      throw new Error('Content type is required')
+    }
+
+    // Ensure content_data is valid JSON
+    const processedData = {
+      ...contentData,
+      content_data: contentData.content_data || {},
+      tags: contentData.tags || [],
+      tier_required: contentData.tier_required || 'free',
+      is_published: contentData.is_published !== false, // Default to true unless explicitly false
+      view_count: 0,
+      like_count: 0,
+      comment_count: 0,
+    }
+
+    console.log('Processed content data for insert:', processedData)
+
     const { data, error } = await supabase
       .from('content')
-      .insert([content])
+      .insert([processedData])
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Error creating content:', error)
+      throw new Error(`Failed to create content: ${error.message}`)
+    }
+
+    console.log('Content created successfully:', data)
     return data
   },
 
   async updateContent(id: string, updates: Partial<Content>) {
+    console.log('Updating content:', id, updates)
+    
     const { data, error } = await supabase
       .from('content')
       .update(updates)
@@ -220,17 +261,26 @@ export const contentService = {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Error updating content:', error)
+      throw error
+    }
+    
     return data
   },
 
   async deleteContent(id: string) {
+    console.log('Deleting content:', id)
+    
     const { error } = await supabase
       .from('content')
       .delete()
       .eq('id', id)
 
-    if (error) throw error
+    if (error) {
+      console.error('Error deleting content:', error)
+      throw error
+    }
   }
 }
 

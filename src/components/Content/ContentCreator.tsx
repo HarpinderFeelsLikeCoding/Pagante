@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Plus, Image, Video, Headphones, Radio, Download, BarChart, MessageCircle, BookOpen, FileText, AlertCircle, CheckCircle } from 'lucide-react'
+import { Plus, Image, Video, Headphones, Radio, Download, BarChart, MessageCircle, BookOpen, FileText, AlertCircle, CheckCircle, Hash } from 'lucide-react'
 import { contentService, type ContentType, type TierType } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -20,7 +20,7 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
     content_type: 'text_post' as ContentType,
     content_data: {},
     tier_required: 'free' as TierType,
-    tags: '',
+    tags: [] as string[],
     scheduled_publish_at: '',
   })
 
@@ -55,13 +55,7 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
     setSuccess('')
 
     try {
-      console.log('Creating content with data:', formData)
-
-      // Parse hashtags from the tags string
-      const parsedTags = formData.tags
-        .split(/[\s,]+/)
-        .map(tag => tag.replace(/^#/, '').trim())
-        .filter(tag => tag.length > 0)
+      console.log('Creating content with form data:', formData)
 
       const contentData = {
         creator_id: creatorId,
@@ -70,7 +64,7 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
         content_type: formData.content_type,
         content_data: getContentData(),
         tier_required: formData.tier_required,
-        tags: parsedTags,
+        tags: formData.tags,
         is_published: !formData.scheduled_publish_at,
         scheduled_publish_at: formData.scheduled_publish_at || null,
       }
@@ -89,7 +83,7 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
         content_type: 'text_post',
         content_data: {},
         tier_required: 'free',
-        tags: '',
+        tags: [],
         scheduled_publish_at: '',
       })
       
@@ -141,6 +135,34 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
         }
       default:
         return formData.content_data
+    }
+  }
+
+  const addTag = (tagText: string) => {
+    const cleanTag = tagText.replace(/^#/, '').trim()
+    if (cleanTag && !formData.tags.includes(cleanTag)) {
+      setFormData({
+        ...formData,
+        tags: [...formData.tags, cleanTag]
+      })
+    }
+  }
+
+  const removeTag = (index: number) => {
+    setFormData({
+      ...formData,
+      tags: formData.tags.filter((_, i) => i !== index)
+    })
+  }
+
+  const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const input = e.currentTarget
+    const value = input.value.trim()
+    
+    if ((e.key === 'Enter' || e.key === ',' || e.key === ' ') && value) {
+      e.preventDefault()
+      addTag(value)
+      input.value = ''
     }
   }
 
@@ -472,17 +494,40 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Tags
           </label>
+          
+          {/* Display current tags */}
+          {formData.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {formData.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                >
+                  <Hash className="w-3 h-3 mr-1" />
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(index)}
+                    className="ml-2 text-blue-600 hover:text-blue-800"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          
+          {/* Tag input */}
           <input
             type="text"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="#tag1 #tag2 #tag3 or tag1, tag2, tag3"
-            value={formData.tags}
-            onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+            placeholder="Type a tag and press Enter, Space, or Comma"
+            onKeyDown={handleTagInput}
             spellCheck="false"
             autoCorrect="off"
           />
           <div className="text-xs text-gray-500 mt-1">
-            Use hashtags (#tag) or separate with commas
+            Press Enter, Space, or Comma to add tags. Use # or just type the tag name.
           </div>
         </div>
 
