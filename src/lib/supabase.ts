@@ -195,7 +195,6 @@ export const contentService = {
       .from('content')
       .select('*')
       .eq('creator_id', creatorId)
-      .eq('is_published', true)
       .order('created_at', { ascending: false })
       .limit(limit)
 
@@ -205,6 +204,56 @@ export const contentService = {
     }
     
     console.log('Fetched content:', data)
+    return data || []
+  },
+
+  async getDiscoverContent(tab: string = 'trending', category: string = 'all', limit = 20) {
+    console.log('Getting discover content for tab:', tab, 'category:', category)
+    
+    let query = supabase
+      .from('content')
+      .select(`
+        *,
+        creators!inner(
+          *,
+          profiles!inner(*)
+        )
+      `)
+      .eq('is_published', true)
+      .limit(limit)
+
+    // Filter by category if not 'all'
+    if (category !== 'all') {
+      query = query.eq('content_type', category)
+    }
+
+    // Sort based on tab
+    switch (tab) {
+      case 'trending':
+        query = query.order('like_count', { ascending: false })
+        break
+      case 'recent':
+        query = query.order('created_at', { ascending: false })
+        break
+      case 'featured':
+        query = query.gte('like_count', 10).order('view_count', { ascending: false })
+        break
+      case 'following':
+        // This would need user's following list - for now just recent
+        query = query.order('created_at', { ascending: false })
+        break
+      default:
+        query = query.order('created_at', { ascending: false })
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error('Error fetching discover content:', error)
+      throw error
+    }
+    
+    console.log('Fetched discover content:', data)
     return data || []
   },
 
@@ -281,6 +330,32 @@ export const contentService = {
       console.error('Error deleting content:', error)
       throw error
     }
+  },
+
+  // Function to publish scheduled content
+  async publishScheduledContent() {
+    console.log('Checking for scheduled content to publish...')
+    
+    const now = new Date().toISOString()
+    
+    const { data, error } = await supabase
+      .from('content')
+      .update({ 
+        is_published: true,
+        scheduled_publish_at: null 
+      })
+      .eq('is_published', false)
+      .not('scheduled_publish_at', 'is', null)
+      .lte('scheduled_publish_at', now)
+      .select()
+
+    if (error) {
+      console.error('Error publishing scheduled content:', error)
+      throw error
+    }
+
+    console.log('Published scheduled content:', data)
+    return data || []
   }
 }
 
@@ -374,4 +449,11 @@ export const streamService = {
     if (error) throw error
     return data
   }
+}
+
+// Auto-publish scheduled content every minute
+if (typeof window !== 'undefined') {
+  setInterval(() => {
+    contentService.publishScheduledContent().catch(console.error)
+  }, 60000) // Check every minute
 }

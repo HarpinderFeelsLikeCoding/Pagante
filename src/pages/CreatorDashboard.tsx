@@ -248,7 +248,7 @@ export function CreatorDashboard() {
                       View All
                     </button>
                   </div>
-                  <ContentFeed creatorId={creator.id} limit={3} />
+                  <ContentFeed creatorId={creator.id} limit={3} showScheduled={true} />
                 </div>
               </div>
             )}
@@ -259,7 +259,10 @@ export function CreatorDashboard() {
                   creatorId={creator.id} 
                   onContentCreated={() => window.location.reload()} 
                 />
-                <ContentFeed creatorId={creator.id} />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">All Content</h3>
+                  <ContentFeed creatorId={creator.id} showScheduled={true} />
+                </div>
               </div>
             )}
 

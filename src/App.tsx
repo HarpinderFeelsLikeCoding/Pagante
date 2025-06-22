@@ -9,6 +9,7 @@ import { Register } from './pages/Register'
 import { Governance } from './pages/Governance'
 import { CreatorDashboard } from './pages/CreatorDashboard'
 import { CreatorProfile } from './pages/CreatorProfile'
+import { Discover } from './pages/Discover'
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/discover" element={<Discover />} />
               <Route path="/governance" element={<Governance />} />
               <Route path="/dashboard" element={<CreatorDashboard />} />
               <Route path="/creator/:username" element={<CreatorProfile />} />

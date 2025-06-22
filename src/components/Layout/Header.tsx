@@ -1,5 +1,5 @@
 import React from 'react'
-import { Shield, Users, Scale, Crown, User, BarChart, LogOut } from 'lucide-react'
+import { Shield, Users, Scale, Crown, User, BarChart, LogOut, Compass } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -41,6 +41,10 @@ export function Header() {
               <span className="text-xl font-bold">Pagante</span>
             </Link>
             <nav className="hidden md:flex space-x-6">
+              <Link to="/discover" className="flex items-center space-x-1 hover:text-gold-300 transition-colors">
+                <Compass className="w-4 h-4" />
+                <span>Discover</span>
+              </Link>
               <Link to="/creators" className="hover:text-gold-300 transition-colors">
                 Creators
               </Link>

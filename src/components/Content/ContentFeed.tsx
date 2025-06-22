@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import { Heart, MessageCircle, Share2, Eye, Clock, Lock } from 'lucide-react'
+import { Heart, MessageCircle, Share2, Eye, Clock, Lock, Calendar, AlertCircle } from 'lucide-react'
 import { contentService, type Content, type Profile } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContentPlayer } from './ContentPlayer'
-import { format } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
 
 interface ContentFeedProps {
   creatorId?: string
   limit?: number
+  showScheduled?: boolean
 }
 
-export function ContentFeed({ creatorId, limit = 20 }: ContentFeedProps) {
+export function ContentFeed({ creatorId, limit = 20, showScheduled = false }: ContentFeedProps) {
   const { profile } = useAuth()
   const [content, setContent] = useState<(Content & { creator?: { profiles: Profile } })[]>([])
   const [loading, setLoading] = useState(true)
@@ -18,7 +19,14 @@ export function ContentFeed({ creatorId, limit = 20 }: ContentFeedProps) {
 
   useEffect(() => {
     loadContent()
-  }, [creatorId])
+    
+    // Set up interval to check for scheduled posts
+    const interval = setInterval(() => {
+      loadContent()
+    }, 60000) // Check every minute
+
+    return () => clearInterval(interval)
+  }, [creatorId, showScheduled])
 
   const loadContent = async () => {
     try {
@@ -30,9 +38,14 @@ export function ContentFeed({ creatorId, limit = 20 }: ContentFeedProps) {
         console.log('Loading content for creator:', creatorId)
         data = await contentService.getCreatorContent(creatorId, limit)
         console.log('Loaded content:', data)
+        
+        // If showScheduled is false, filter out unpublished content
+        if (!showScheduled) {
+          data = data.filter(post => post.is_published)
+        }
       } else {
-        // Load feed from all creators (would need to implement this)
-        data = []
+        // Load feed from all creators
+        data = await contentService.getDiscoverContent('recent', 'all', limit)
       }
       setContent(data)
     } catch (error: any) {
@@ -65,6 +78,24 @@ export function ContentFeed({ creatorId, limit = 20 }: ContentFeedProps) {
       case 'digital_download': return '📁'
       default: return '📄'
     }
+  }
+
+  const isScheduled = (post: Content) => {
+    return !post.is_published && post.scheduled_publish_at && new Date(post.scheduled_publish_at) > new Date()
+  }
+
+  const getScheduledTime = (post: Content) => {
+    if (!post.scheduled_publish_at) return null
+    const scheduledDate = new Date(post.scheduled_publish_at)
+    const now = new Date()
+    
+    if (scheduledDate > now) {
+      return {
+        relative: formatDistanceToNow(scheduledDate, { addSuffix: true }),
+        absolute: format(scheduledDate, 'MMM d, yyyy h:mm a')
+      }
+    }
+    return null
   }
 
   if (loading) {
@@ -112,9 +143,31 @@ export function ContentFeed({ creatorId, limit = 20 }: ContentFeedProps) {
       {content.map((post) => {
         const tierBadge = getTierBadge(post.tier_required)
         const contentIcon = getContentTypeIcon(post.content_type)
+        const scheduled = isScheduled(post)
+        const scheduledTime = getScheduledTime(post)
         
         return (
-          <article key={post.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-200">
+          <article 
+            key={post.id} 
+            className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 border ${
+              scheduled ? 'border-orange-200 bg-orange-50' : 'border-gray-200'
+            }`}
+          >
+            {/* Scheduled Post Banner */}
+            {scheduled && scheduledTime && (
+              <div className="bg-orange-100 border-b border-orange-200 px-6 py-3">
+                <div className="flex items-center space-x-2 text-orange-800">
+                  <Calendar className="w-4 h-4" />
+                  <span className="text-sm font-medium">
+                    Scheduled to publish {scheduledTime.relative}
+                  </span>
+                  <span className="text-xs text-orange-600">
+                    ({scheduledTime.absolute})
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3">
@@ -133,8 +186,14 @@ export function ContentFeed({ creatorId, limit = 20 }: ContentFeedProps) {
                         )}
                       </span>
                       <span className="text-gray-500 text-sm">
-                        {format(new Date(post.created_at), 'MMM d, yyyy')}
+                        {scheduled ? 'Draft' : format(new Date(post.created_at), 'MMM d, yyyy')}
                       </span>
+                      {scheduled && (
+                        <span className="flex items-center space-x-1 text-orange-600 text-xs">
+                          <Clock className="w-3 h-3" />
+                          <span>Scheduled</span>
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -149,7 +208,20 @@ export function ContentFeed({ creatorId, limit = 20 }: ContentFeedProps) {
                 <p className="text-gray-600 mb-4">{post.description}</p>
               )}
 
-              <ContentPlayer content={post} />
+              {/* Only show content if published or if we're showing scheduled content */}
+              {(post.is_published || showScheduled) && (
+                <ContentPlayer content={post} />
+              )}
+
+              {/* Show preview message for scheduled content */}
+              {scheduled && !showScheduled && (
+                <div className="bg-gray-100 rounded-lg p-4 text-center">
+                  <AlertCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                  <div className="text-gray-600">
+                    This content is scheduled and will be published {scheduledTime?.relative}
+                  </div>
+                </div>
+              )}
 
               {post.tags && post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-4">
@@ -182,8 +254,8 @@ export function ContentFeed({ creatorId, limit = 20 }: ContentFeedProps) {
                   </button>
                 </div>
 
-                {post.scheduled_publish_at && new Date(post.scheduled_publish_at) > new Date() && (
-                  <div className="flex items-center space-x-1 text-orange-600 text-sm">
+                {scheduled && (
+                  <div className="flex items-center space-x-1 text-orange-600 text-sm font-medium">
                     <Clock className="w-4 h-4" />
                     <span>Scheduled</span>
                   </div>
