@@ -15,6 +15,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     password: '',
     username: '',
     fullName: '',
+    rememberMe: false,
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -28,6 +29,14 @@ export function AuthForm({ mode }: AuthFormProps) {
     }
   }, [user, profile, authLoading, navigate])
 
+  // Load remember me preference for login form
+  useEffect(() => {
+    if (mode === 'login') {
+      const savedRememberMe = localStorage.getItem('pagante_remember_me') === 'true'
+      setFormData(prev => ({ ...prev, rememberMe: savedRememberMe }))
+    }
+  }, [mode])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -36,7 +45,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
     try {
       if (mode === 'login') {
-        await signIn(formData.email, formData.password)
+        await signIn(formData.email, formData.password, formData.rememberMe)
         setSuccess('Successfully signed in! Redirecting...')
         setTimeout(() => navigate('/dashboard'), 1000)
       } else {
@@ -72,9 +81,10 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, type, checked, value } = e.target
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: type === 'checkbox' ? checked : value,
     })
   }
 
@@ -133,6 +143,9 @@ export function AuthForm({ mode }: AuthFormProps) {
                       placeholder="Full Name"
                       value={formData.fullName}
                       onChange={handleChange}
+                      spellCheck="true"
+                      autoCorrect="on"
+                      autoCapitalize="words"
                     />
                   </div>
                 </div>
@@ -155,6 +168,9 @@ export function AuthForm({ mode }: AuthFormProps) {
                       placeholder="Username (min 3 characters)"
                       value={formData.username}
                       onChange={handleChange}
+                      spellCheck="false"
+                      autoCorrect="off"
+                      autoCapitalize="none"
                     />
                   </div>
                 </div>
@@ -180,6 +196,9 @@ export function AuthForm({ mode }: AuthFormProps) {
                   placeholder="Email address"
                   value={formData.email}
                   onChange={handleChange}
+                  spellCheck="false"
+                  autoCorrect="off"
+                  autoCapitalize="none"
                 />
               </div>
             </div>
@@ -203,9 +222,29 @@ export function AuthForm({ mode }: AuthFormProps) {
                   placeholder={mode === 'register' ? 'Password (min 6 characters)' : 'Password'}
                   value={formData.password}
                   onChange={handleChange}
+                  spellCheck="false"
+                  autoCorrect="off"
                 />
               </div>
             </div>
+
+            {/* Remember Me Checkbox - Only for Login */}
+            {mode === 'login' && (
+              <div className="flex items-center">
+                <input
+                  id="rememberMe"
+                  name="rememberMe"
+                  type="checkbox"
+                  disabled={isLoading}
+                  className="h-4 w-4 text-gold-600 focus:ring-gold-500 border-gray-600 rounded bg-gray-800"
+                  checked={formData.rememberMe}
+                  onChange={handleChange}
+                />
+                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-300">
+                  Remember me on this device
+                </label>
+              </div>
+            )}
           </div>
 
           {error && (
@@ -238,6 +277,18 @@ export function AuthForm({ mode }: AuthFormProps) {
               )}
             </button>
           </div>
+
+          {/* Remember Me Info for Login */}
+          {mode === 'login' && (
+            <div className="text-center">
+              <p className="text-xs text-gray-400">
+                {formData.rememberMe 
+                  ? 'You will stay signed in until you manually sign out'
+                  : 'You will be signed out when you close your browser'
+                }
+              </p>
+            </div>
+          )}
 
           <div className="text-center">
             <span className="text-gray-300 text-sm">

@@ -7,7 +7,7 @@ interface AuthContextType {
   profile: Profile | null
   loading: boolean
   signUp: (email: string, password: string, userData: Partial<Profile>) => Promise<void>
-  signIn: (email: string, password: string) => Promise<void>
+  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<void>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
 }
@@ -33,6 +33,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       try {
         console.log('Initializing auth...')
+        
+        // Check if user wants to be remembered
+        const rememberMe = localStorage.getItem('pagante_remember_me') === 'true'
+        
+        if (!rememberMe) {
+          // If user doesn't want to be remembered, clear any existing session
+          console.log('Remember me disabled, clearing session')
+          await supabase.auth.signOut()
+          if (mounted) {
+            setUser(null)
+            setProfile(null)
+            setLoading(false)
+          }
+          return
+        }
+
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
@@ -75,6 +91,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null)
         setProfile(null)
         setLoading(false)
+        // Clear remember me preference on explicit sign out
+        localStorage.removeItem('pagante_remember_me')
         return
       }
 
@@ -93,23 +111,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     })
 
-    // Set up periodic session refresh to prevent logout
-    const refreshInterval = setInterval(async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session?.user && mounted) {
-          // Session is still valid, refresh it
-          await supabase.auth.refreshSession()
-        }
-      } catch (error) {
-        console.error('Error refreshing session:', error)
+    // Only set up session refresh if remember me is enabled
+    let refreshInterval: NodeJS.Timeout | null = null
+    
+    const setupSessionRefresh = () => {
+      const rememberMe = localStorage.getItem('pagante_remember_me') === 'true'
+      
+      if (rememberMe) {
+        refreshInterval = setInterval(async () => {
+          try {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (session?.user && mounted) {
+              // Session is still valid, refresh it
+              await supabase.auth.refreshSession()
+            }
+          } catch (error) {
+            console.error('Error refreshing session:', error)
+          }
+        }, 30 * 60 * 1000) // Refresh every 30 minutes
       }
-    }, 30 * 60 * 1000) // Refresh every 30 minutes
+    }
+
+    setupSessionRefresh()
 
     return () => {
       mounted = false
       subscription.unsubscribe()
-      clearInterval(refreshInterval)
+      if (refreshInterval) {
+        clearInterval(refreshInterval)
+      }
     }
   }, [])
 
@@ -217,6 +247,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Profile created successfully')
       setProfile(profileData)
 
+      // Set remember me to true by default for new signups
+      localStorage.setItem('pagante_remember_me', 'true')
+
     } catch (err: any) {
       console.error('Signup error:', err)
       throw err
@@ -225,11 +258,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const signIn = async (email: string, password: string) => {
-    console.log('Signing in user:', email)
+  const signIn = async (email: string, password: string, rememberMe: boolean = false) => {
+    console.log('Signing in user:', email, 'Remember me:', rememberMe)
     
     try {
       setLoading(true)
+      
+      // Set remember me preference BEFORE signing in
+      localStorage.setItem('pagante_remember_me', rememberMe.toString())
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -252,10 +288,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('No user data returned from sign in')
       }
 
-      console.log('Sign in successful')
+      console.log('Sign in successful, remember me:', rememberMe)
       
     } catch (err: any) {
       console.error('Sign in error:', err)
+      // Clear remember me preference on failed login
+      localStorage.removeItem('pagante_remember_me')
       throw err
     } finally {
       setLoading(false)
@@ -267,6 +305,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       setLoading(true)
+      
+      // Clear remember me preference
+      localStorage.removeItem('pagante_remember_me')
+      
       const { error } = await supabase.auth.signOut()
       if (error) {
         console.error('Sign out error:', error)
