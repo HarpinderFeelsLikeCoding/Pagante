@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Plus, Image, Video, Headphones, Radio, Download, BarChart, MessageCircle, BookOpen, FileText, AlertCircle, CheckCircle, Hash } from 'lucide-react'
+import React, { useState, useRef } from 'react'
+import { Plus, Image, Video, Headphones, Radio, Download, BarChart, MessageCircle, BookOpen, FileText, AlertCircle, CheckCircle, Hash, Upload, X } from 'lucide-react'
 import { contentService, type ContentType, type TierType } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -10,10 +10,12 @@ interface ContentCreatorProps {
 
 export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorProps) {
   const { profile } = useAuth()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [uploadingImage, setUploadingImage] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -42,6 +44,60 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
     { value: 'premium', label: 'Premium', color: 'bg-purple-100 text-purple-800' },
     { value: 'vip', label: 'VIP', color: 'bg-gold-100 text-gold-800' },
   ]
+
+  // Placeholder images for different content types
+  const getPlaceholderImage = (contentType: string) => {
+    const placeholders = {
+      image: 'https://images.pexels.com/photos/1591056/pexels-photo-1591056.jpeg?auto=compress&cs=tinysrgb&w=800',
+      video: 'https://images.pexels.com/photos/1591061/pexels-photo-1591061.jpeg?auto=compress&cs=tinysrgb&w=800',
+      audio: 'https://images.pexels.com/photos/1591062/pexels-photo-1591062.jpeg?auto=compress&cs=tinysrgb&w=800',
+      article: 'https://images.pexels.com/photos/1591063/pexels-photo-1591063.jpeg?auto=compress&cs=tinysrgb&w=800',
+      default: 'https://images.pexels.com/photos/1591064/pexels-photo-1591064.jpeg?auto=compress&cs=tinysrgb&w=800'
+    }
+    return placeholders[contentType as keyof typeof placeholders] || placeholders.default
+  }
+
+  const handleImageUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file')
+      return
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      setError('Image file size must be less than 10MB')
+      return
+    }
+
+    setUploadingImage(true)
+    setError('')
+
+    try {
+      // Convert file to base64 for preview (in a real app, you'd upload to a service like Supabase Storage)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const imageUrl = e.target?.result as string
+        setFormData({
+          ...formData,
+          content_data: { 
+            ...formData.content_data, 
+            image_url: imageUrl,
+            file_name: file.name,
+            file_size: file.size
+          }
+        })
+        setUploadingImage(false)
+      }
+      reader.onerror = () => {
+        setError('Failed to read image file')
+        setUploadingImage(false)
+      }
+      reader.readAsDataURL(file)
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      setError('Failed to upload image')
+      setUploadingImage(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -109,19 +165,21 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
         return { text: formData.content_data.text || '' }
       case 'image':
         return { 
-          image_url: formData.content_data.image_url || '',
-          alt_text: formData.content_data.alt_text || ''
+          image_url: formData.content_data.image_url || getPlaceholderImage('image'),
+          file_name: formData.content_data.file_name || 'image.jpg',
+          file_size: formData.content_data.file_size || 0
         }
       case 'video':
         return {
           video_url: formData.content_data.video_url || '',
-          thumbnail_url: formData.content_data.thumbnail_url || '',
+          thumbnail_url: formData.content_data.thumbnail_url || getPlaceholderImage('video'),
           duration: formData.content_data.duration || 0
         }
       case 'audio':
         return {
           audio_url: formData.content_data.audio_url || '',
-          duration: formData.content_data.duration || 0
+          duration: formData.content_data.duration || 0,
+          thumbnail_url: getPlaceholderImage('audio')
         }
       case 'poll':
         return {
@@ -139,7 +197,7 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
   }
 
   const addTag = (tagText: string) => {
-    const cleanTag = tagText.replace(/^#/, '').trim()
+    const cleanTag = tagText.replace(/^#/, '').trim().toLowerCase()
     if (cleanTag && !formData.tags.includes(cleanTag)) {
       setFormData({
         ...formData,
@@ -196,37 +254,90 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Image URL
+                Upload Image
               </label>
-              <input
-                type="url"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="https://example.com/image.jpg"
-                value={formData.content_data.image_url || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  content_data: { ...formData.content_data, image_url: e.target.value }
-                })}
-                spellCheck="false"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Alt Text
-              </label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Describe the image..."
-                value={formData.content_data.alt_text || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  content_data: { ...formData.content_data, alt_text: e.target.value }
-                })}
-                spellCheck="true"
-                autoCorrect="on"
-                autoCapitalize="sentences"
-              />
+              
+              {/* Image Preview */}
+              {formData.content_data.image_url && (
+                <div className="relative mb-4">
+                  <img
+                    src={formData.content_data.image_url}
+                    alt="Preview"
+                    className="w-full h-48 object-cover rounded-lg border border-gray-300"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setFormData({
+                      ...formData,
+                      content_data: { ...formData.content_data, image_url: '', file_name: '', file_size: 0 }
+                    })}
+                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Upload Button */}
+              <div className="flex items-center space-x-4">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImage}
+                  className="flex items-center space-x-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg border border-blue-200 hover:bg-blue-100 transition-colors disabled:opacity-50"
+                >
+                  {uploadingImage ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4" />
+                      <span>Choose Image</span>
+                    </>
+                  )}
+                </button>
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      handleImageUpload(file)
+                    }
+                  }}
+                  className="hidden"
+                />
+                
+                <span className="text-sm text-gray-500">
+                  or drag and drop (max 10MB)
+                </span>
+              </div>
+
+              {/* Alternative URL input */}
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Or paste image URL
+                </label>
+                <input
+                  type="url"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="https://example.com/image.jpg"
+                  value={formData.content_data.image_url?.startsWith('data:') ? '' : formData.content_data.image_url || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    content_data: { 
+                      ...formData.content_data, 
+                      image_url: e.target.value,
+                      file_name: e.target.value.split('/').pop() || 'image.jpg'
+                    }
+                  })}
+                  spellCheck="false"
+                />
+              </div>
             </div>
           </div>
         )
@@ -241,7 +352,7 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
               <input
                 type="url"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="https://example.com/video.mp4"
+                placeholder="https://example.com/video.mp4 or YouTube/Vimeo URL"
                 value={formData.content_data.video_url || ''}
                 onChange={(e) => setFormData({
                   ...formData,
@@ -252,7 +363,7 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Thumbnail URL
+                Thumbnail URL (optional)
               </label>
               <input
                 type="url"
@@ -265,6 +376,9 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
                 })}
                 spellCheck="false"
               />
+              <div className="text-xs text-gray-500 mt-1">
+                If not provided, a default thumbnail will be used
+              </div>
             </div>
           </div>
         )
@@ -558,7 +672,7 @@ export function ContentCreator({ creatorId, onContentCreated }: ContentCreatorPr
           </button>
           <button
             type="submit"
-            disabled={loading || !formData.title.trim()}
+            disabled={loading || !formData.title.trim() || uploadingImage}
             className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (

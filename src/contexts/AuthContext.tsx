@@ -70,6 +70,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (!mounted) return
 
+      // Handle different auth events
+      if (event === 'SIGNED_OUT') {
+        setUser(null)
+        setProfile(null)
+        setLoading(false)
+        return
+      }
+
       // Don't refetch profile on token refresh
       if (event === 'TOKEN_REFRESHED') {
         return
@@ -79,15 +87,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
         await fetchProfile(session.user.id)
-      } else {
+      } else if (!session?.user) {
         setProfile(null)
         setLoading(false)
       }
     })
 
+    // Set up periodic session refresh to prevent logout
+    const refreshInterval = setInterval(async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user && mounted) {
+          // Session is still valid, refresh it
+          await supabase.auth.refreshSession()
+        }
+      } catch (error) {
+        console.error('Error refreshing session:', error)
+      }
+    }, 30 * 60 * 1000) // Refresh every 30 minutes
+
     return () => {
       mounted = false
       subscription.unsubscribe()
+      clearInterval(refreshInterval)
     }
   }, [])
 
@@ -207,6 +229,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('Signing in user:', email)
     
     try {
+      setLoading(true)
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -233,6 +257,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       console.error('Sign in error:', err)
       throw err
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -240,6 +266,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('Signing out user')
     
     try {
+      setLoading(true)
       const { error } = await supabase.auth.signOut()
       if (error) {
         console.error('Sign out error:', error)
@@ -248,11 +275,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       setProfile(null)
       setUser(null)
-      setLoading(false)
       console.log('Sign out successful')
     } catch (error) {
       console.error('Sign out error:', error)
       throw error
+    } finally {
+      setLoading(false)
     }
   }
 
