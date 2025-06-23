@@ -70,6 +70,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (!mounted) return
 
+      // Handle different auth events
+      if (event === 'SIGNED_OUT') {
+        setUser(null)
+        setProfile(null)
+        setLoading(false)
+        return
+      }
+
       // Don't refetch profile on token refresh
       if (event === 'TOKEN_REFRESHED') {
         return
@@ -79,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
         await fetchProfile(session.user.id)
-      } else {
+      } else if (!session?.user) {
         setProfile(null)
         setLoading(false)
       }
@@ -203,8 +211,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const signIn = async (email: string, password: string) => {
-    console.log('Signing in user:', email)
+  const signIn = async (email: string, password: string, rememberMe: boolean = false) => {
+    console.log('Signing in user:', email, 'Remember me:', rememberMe)
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -228,7 +236,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('No user data returned from sign in')
       }
 
-      console.log('Sign in successful')
+      console.log('Sign in successful, remember me:', rememberMe)
       
     } catch (err: any) {
       console.error('Sign in error:', err)
