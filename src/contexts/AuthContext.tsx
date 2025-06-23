@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import { supabase, type Profile } from '../lib/supabase'
 import { User } from '@supabase/supabase-js'
 
@@ -7,7 +7,7 @@ interface AuthContextType {
   profile: Profile | null
   loading: boolean
   signUp: (email: string, password: string, userData: Partial<Profile>) => Promise<void>
-  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<void>
+  signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
 }
@@ -26,19 +26,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
-  const initialized = useRef(false)
-  const authSubscription = useRef<any>(null)
 
   useEffect(() => {
     let mounted = true
 
     const initializeAuth = async () => {
-      if (initialized.current) return
-      initialized.current = true
-
       try {
         console.log('Initializing auth...')
-        
         const { data: { session }, error } = await supabase.auth.getSession()
         
         if (error) {
@@ -70,38 +64,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     initializeAuth()
 
-    // Set up auth state listener with minimal interference
-    if (!authSubscription.current) {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.id || 'No user')
-        
-        if (!mounted) return
-
-        // Only handle explicit authentication events
-        if (event === 'SIGNED_IN') {
-          console.log('User signed in')
-          setUser(session?.user ?? null)
-          if (session?.user) {
-            await fetchProfile(session.user.id)
-          }
-        } else if (event === 'SIGNED_OUT') {
-          console.log('User signed out')
-          setUser(null)
-          setProfile(null)
-          setLoading(false)
-        }
-        // Completely ignore TOKEN_REFRESHED and other events
-      })
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session?.user?.id || 'No user')
       
-      authSubscription.current = subscription
-    }
+      if (!mounted) return
+
+      // Don't refetch profile on token refresh
+      if (event === 'TOKEN_REFRESHED') {
+        return
+      }
+
+      setUser(session?.user ?? null)
+      
+      if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        await fetchProfile(session.user.id)
+      } else {
+        setProfile(null)
+        setLoading(false)
+      }
+    })
 
     return () => {
       mounted = false
-      if (authSubscription.current) {
-        authSubscription.current.unsubscribe()
-        authSubscription.current = null
-      }
+      subscription.unsubscribe()
     }
   }, [])
 
@@ -109,15 +95,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Fetching profile for user:', userId)
       
-      const { data, error } = await supabase
+      // Add a timeout to prevent infinite hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 10000)
+      })
+
+      const fetchPromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .maybeSingle()
 
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any
+
       if (error) {
         console.error('Error fetching profile:', error)
-        setProfile(null)
+        if (error.code === 'PGRST116') {
+          console.log('Profile not found - user may need to complete registration')
+          setProfile(null)
+        } else {
+          console.error('Database error:', error.message)
+          setProfile(null)
+        }
       } else if (data) {
         console.log('Profile found:', data.username)
         setProfile(data)
@@ -204,12 +203,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const signIn = async (email: string, password: string, rememberMe: boolean = false) => {
+  const signIn = async (email: string, password: string) => {
     console.log('Signing in user:', email)
     
     try {
-      setLoading(true)
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -236,8 +233,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (err: any) {
       console.error('Sign in error:', err)
       throw err
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -245,23 +240,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('Signing out user')
     
     try {
-      setLoading(true)
-      
       const { error } = await supabase.auth.signOut()
       if (error) {
         console.error('Sign out error:', error)
         throw error
       }
       
-      // Clear state immediately
       setProfile(null)
       setUser(null)
+      setLoading(false)
       console.log('Sign out successful')
     } catch (error) {
       console.error('Sign out error:', error)
       throw error
-    } finally {
-      setLoading(false)
     }
   }
 
