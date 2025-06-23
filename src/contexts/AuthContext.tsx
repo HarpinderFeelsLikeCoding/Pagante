@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { supabase, type Profile } from '../lib/supabase'
 import { User } from '@supabase/supabase-js'
 
@@ -26,11 +26,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const initialized = useRef(false)
+  const authSubscription = useRef<any>(null)
 
   useEffect(() => {
     let mounted = true
 
     const initializeAuth = async () => {
+      if (initialized.current) return
+      initialized.current = true
+
       try {
         console.log('Initializing auth...')
         
@@ -65,29 +70,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     initializeAuth()
 
-    // Simplified auth state listener - only handle sign in/out events
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event, session?.user?.id || 'No user')
-      
-      if (!mounted) return
+    // Set up auth state listener with minimal interference
+    if (!authSubscription.current) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id || 'No user')
+        
+        if (!mounted) return
 
-      // Only handle explicit sign in/out events, ignore token refreshes
-      if (event === 'SIGNED_IN') {
-        setUser(session?.user ?? null)
-        if (session?.user) {
-          await fetchProfile(session.user.id)
+        // Only handle explicit authentication events
+        if (event === 'SIGNED_IN') {
+          console.log('User signed in')
+          setUser(session?.user ?? null)
+          if (session?.user) {
+            await fetchProfile(session.user.id)
+          }
+        } else if (event === 'SIGNED_OUT') {
+          console.log('User signed out')
+          setUser(null)
+          setProfile(null)
+          setLoading(false)
         }
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null)
-        setProfile(null)
-        setLoading(false)
-      }
-      // Ignore all other events (TOKEN_REFRESHED, etc.)
-    })
+        // Completely ignore TOKEN_REFRESHED and other events
+      })
+      
+      authSubscription.current = subscription
+    }
 
     return () => {
       mounted = false
-      subscription.unsubscribe()
+      if (authSubscription.current) {
+        authSubscription.current.unsubscribe()
+        authSubscription.current = null
+      }
     }
   }, [])
 

@@ -18,8 +18,27 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false, // Disable URL detection to prevent issues
-    flowType: 'pkce'
+    detectSessionInUrl: false,
+    // Disable automatic session storage events that cause logouts
+    storageKey: 'pagante-auth-token',
+    storage: {
+      getItem: (key: string) => {
+        if (typeof window !== 'undefined') {
+          return window.localStorage.getItem(key)
+        }
+        return null
+      },
+      setItem: (key: string, value: string) => {
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(key, value)
+        }
+      },
+      removeItem: (key: string) => {
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem(key)
+        }
+      }
+    }
   },
   global: {
     headers: {
