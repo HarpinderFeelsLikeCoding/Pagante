@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { supabase, type Creator } from '../lib/supabase'
+import { supabase, type Creator, contentService } from '../lib/supabase'
 import { ContentCreator } from '../components/Content/ContentCreator'
 import { ContentFeed } from '../components/Content/ContentFeed'
 import { LiveStreamManager } from '../components/Streaming/LiveStreamManager'
@@ -14,6 +14,7 @@ export function CreatorDashboard() {
   const [creator, setCreator] = useState<Creator | null>(null)
   const [activeTab, setActiveTab] = useState('overview')
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -31,6 +32,11 @@ export function CreatorDashboard() {
     if (!profile) return
 
     try {
+      setLoading(true)
+      setError('')
+      
+      console.log('Loading creator profile for user:', profile.id)
+      
       const { data, error } = await supabase
         .from('creators')
         .select('*')
@@ -38,10 +44,12 @@ export function CreatorDashboard() {
         .single()
 
       if (error && error.code !== 'PGRST116') {
+        console.error('Error loading creator profile:', error)
         throw error
       }
 
       if (!data) {
+        console.log('No creator profile found, creating one...')
         // Create creator profile if it doesn't exist
         const { data: newCreator, error: createError } = await supabase
           .from('creators')
@@ -52,16 +60,28 @@ export function CreatorDashboard() {
           .select()
           .single()
 
-        if (createError) throw createError
+        if (createError) {
+          console.error('Error creating creator profile:', createError)
+          throw createError
+        }
+        
+        console.log('Created new creator profile:', newCreator)
         setCreator(newCreator)
       } else {
+        console.log('Found existing creator profile:', data)
         setCreator(data)
       }
-    } catch (error) {
-      console.error('Error loading creator profile:', error)
+    } catch (error: any) {
+      console.error('Error in loadCreatorProfile:', error)
+      setError('Failed to load creator profile: ' + error.message)
     } finally {
       setLoading(false)
     }
+  }
+
+  const refreshContent = () => {
+    // Force a refresh of the content feed
+    window.location.reload()
   }
 
   const tabs = [
@@ -116,11 +136,29 @@ export function CreatorDashboard() {
     )
   }
 
-  if (!creator) {
+  // Show error if there was a problem loading the creator profile
+  if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-600 text-lg mb-2">Error loading creator profile</div>
+          <div className="text-gray-600 mb-4">{error}</div>
+          <button
+            onClick={loadCreatorProfile}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!creator) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 text-lg mb-2">Creator profile not found</div>
           <button
             onClick={loadCreatorProfile}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -257,7 +295,7 @@ export function CreatorDashboard() {
               <div className="space-y-8">
                 <ContentCreator 
                   creatorId={creator.id} 
-                  onContentCreated={() => window.location.reload()} 
+                  onContentCreated={refreshContent} 
                 />
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">All Content</h3>

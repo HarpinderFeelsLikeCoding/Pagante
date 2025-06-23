@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Compass, TrendingUp, Clock, Star, Users, Search, Filter } from 'lucide-react'
-import { contentService, type Content, type Profile } from '../lib/supabase'
+import { contentService, type Content } from '../lib/supabase'
 import { ContentFeed } from '../components/Content/ContentFeed'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -9,8 +9,8 @@ export function Discover() {
   const [activeTab, setActiveTab] = useState('trending')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [content, setContent] = useState<Content[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   const tabs = [
     { id: 'trending', label: 'Trending', icon: TrendingUp },
@@ -37,23 +37,28 @@ export function Discover() {
   const loadDiscoverContent = async () => {
     try {
       setLoading(true)
-      // For now, we'll simulate different content feeds
-      // In a real app, you'd have different endpoints for trending, recent, etc.
-      const data = await contentService.getDiscoverContent(activeTab, selectedCategory)
-      setContent(data)
-    } catch (error) {
+      setError('')
+      
+      console.log('Loading discover content for tab:', activeTab, 'category:', selectedCategory)
+      
+      // Try to get content with creator info, but fallback to simple content if that fails
+      let data
+      try {
+        data = await contentService.getDiscoverContent(activeTab, selectedCategory)
+      } catch (err) {
+        console.log('Failed to get content with creator info, trying simple query...')
+        data = await contentService.getAllPublishedContent()
+      }
+      
+      console.log('Loaded discover content:', data)
+      
+    } catch (error: any) {
       console.error('Error loading discover content:', error)
+      setError('Failed to load content: ' + error.message)
     } finally {
       setLoading(false)
     }
   }
-
-  const filteredContent = content.filter(post => 
-    searchQuery === '' || 
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-  )
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -163,46 +168,21 @@ export function Discover() {
                 </div>
               ))}
             </div>
-          ) : filteredContent.length === 0 ? (
+          ) : error ? (
             <div className="text-center py-12">
-              <Compass className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No content found</h3>
-              <p className="text-gray-600">
-                {searchQuery 
-                  ? `No results for "${searchQuery}". Try different keywords.`
-                  : 'No content available in this category.'
-                }
-              </p>
+              <div className="text-red-500 text-lg mb-2">Error loading content</div>
+              <div className="text-gray-400 mb-4">{error}</div>
+              <button
+                onClick={loadDiscoverContent}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
             </div>
           ) : (
-            <div className="space-y-6">
-              {filteredContent.map((post) => (
-                <div key={post.id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                  {/* Content preview would go here */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">{post.title}</h3>
-                      <p className="text-gray-600">{post.description}</p>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {new Date(post.created_at).toLocaleDateString()}
-                    </div>
-                  </div>
-                  
-                  {post.tags && post.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {post.tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium hover:bg-blue-100 transition-colors cursor-pointer"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">All Published Content</h3>
+              <ContentFeed limit={20} />
             </div>
           )}
         </div>

@@ -33,24 +33,34 @@ export function ContentFeed({ creatorId, limit = 20, showScheduled = false }: Co
       setLoading(true)
       setError('')
       
+      console.log('Loading content feed...', { creatorId, showScheduled, limit })
+      
       let data
       if (creatorId) {
         console.log('Loading content for creator:', creatorId)
         data = await contentService.getCreatorContent(creatorId, limit)
-        console.log('Loaded content:', data)
+        console.log('Loaded creator content:', data)
         
         // If showScheduled is false, filter out unpublished content
         if (!showScheduled) {
           data = data.filter(post => post.is_published)
         }
       } else {
-        // Load feed from all creators
-        data = await contentService.getDiscoverContent('recent', 'all', limit)
+        // Load feed from all creators - try with creator info first, fallback to simple query
+        console.log('Loading all published content...')
+        try {
+          data = await contentService.getDiscoverContent('recent', 'all', limit)
+        } catch (err) {
+          console.log('Failed to get content with creator info, trying simple query...')
+          data = await contentService.getAllPublishedContent(limit)
+        }
       }
+      
+      console.log('Final content data:', data)
       setContent(data)
     } catch (error: any) {
       console.error('Error loading content:', error)
-      setError('Failed to load content')
+      setError('Failed to load content: ' + error.message)
     } finally {
       setLoading(false)
     }

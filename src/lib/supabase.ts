@@ -192,143 +192,198 @@ export const contentService = {
   async getCreatorContent(creatorId: string, limit = 20) {
     console.log('Getting creator content for:', creatorId)
     
-    const { data, error } = await supabase
-      .from('content')
-      .select('*')
-      .eq('creator_id', creatorId)
-      .order('created_at', { ascending: false })
-      .limit(limit)
+    try {
+      const { data, error } = await supabase
+        .from('content')
+        .select('*')
+        .eq('creator_id', creatorId)
+        .order('created_at', { ascending: false })
+        .limit(limit)
 
-    if (error) {
-      console.error('Error fetching creator content:', error)
-      throw error
+      if (error) {
+        console.error('Error fetching creator content:', error)
+        throw error
+      }
+      
+      console.log('Fetched content:', data)
+      return data || []
+    } catch (error) {
+      console.error('Error in getCreatorContent:', error)
+      return []
     }
-    
-    console.log('Fetched content:', data)
-    return data || []
   },
 
   async getDiscoverContent(tab: string = 'trending', category: string = 'all', limit = 20) {
     console.log('Getting discover content for tab:', tab, 'category:', category)
     
-    let query = supabase
-      .from('content')
-      .select(`
-        *,
-        creators!inner(
+    try {
+      let query = supabase
+        .from('content')
+        .select(`
           *,
-          profiles!inner(*)
-        )
-      `)
-      .eq('is_published', true)
-      .limit(limit)
+          creators!inner(
+            *,
+            profiles!inner(*)
+          )
+        `)
+        .eq('is_published', true)
+        .limit(limit)
 
-    // Filter by category if not 'all'
-    if (category !== 'all') {
-      query = query.eq('content_type', category)
+      // Filter by category if not 'all'
+      if (category !== 'all') {
+        query = query.eq('content_type', category)
+      }
+
+      // Sort based on tab
+      switch (tab) {
+        case 'trending':
+          query = query.order('like_count', { ascending: false })
+          break
+        case 'recent':
+          query = query.order('created_at', { ascending: false })
+          break
+        case 'featured':
+          query = query.gte('like_count', 10).order('view_count', { ascending: false })
+          break
+        case 'following':
+          // This would need user's following list - for now just recent
+          query = query.order('created_at', { ascending: false })
+          break
+        default:
+          query = query.order('created_at', { ascending: false })
+      }
+
+      const { data, error } = await query
+
+      if (error) {
+        console.error('Error fetching discover content:', error)
+        throw error
+      }
+      
+      console.log('Fetched discover content:', data)
+      return data || []
+    } catch (error) {
+      console.error('Error in getDiscoverContent:', error)
+      return []
     }
+  },
 
-    // Sort based on tab
-    switch (tab) {
-      case 'trending':
-        query = query.order('like_count', { ascending: false })
-        break
-      case 'recent':
-        query = query.order('created_at', { ascending: false })
-        break
-      case 'featured':
-        query = query.gte('like_count', 10).order('view_count', { ascending: false })
-        break
-      case 'following':
-        // This would need user's following list - for now just recent
-        query = query.order('created_at', { ascending: false })
-        break
-      default:
-        query = query.order('created_at', { ascending: false })
-    }
-
-    const { data, error } = await query
-
-    if (error) {
-      console.error('Error fetching discover content:', error)
-      throw error
-    }
+  async getAllPublishedContent(limit = 20) {
+    console.log('Getting all published content')
     
-    console.log('Fetched discover content:', data)
-    return data || []
+    try {
+      const { data, error } = await supabase
+        .from('content')
+        .select(`
+          *,
+          creators!inner(
+            *,
+            profiles!inner(*)
+          )
+        `)
+        .eq('is_published', true)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+
+      if (error) {
+        console.error('Error fetching all published content:', error)
+        throw error
+      }
+      
+      console.log('Fetched all published content:', data)
+      return data || []
+    } catch (error) {
+      console.error('Error in getAllPublishedContent:', error)
+      return []
+    }
   },
 
   async createContent(contentData: Partial<Content>) {
     console.log('Creating content with data:', contentData)
     
-    // Validate required fields
-    if (!contentData.creator_id) {
-      throw new Error('Creator ID is required')
-    }
-    if (!contentData.title?.trim()) {
-      throw new Error('Title is required')
-    }
-    if (!contentData.content_type) {
-      throw new Error('Content type is required')
-    }
+    try {
+      // Validate required fields
+      if (!contentData.creator_id) {
+        throw new Error('Creator ID is required')
+      }
+      if (!contentData.title?.trim()) {
+        throw new Error('Title is required')
+      }
+      if (!contentData.content_type) {
+        throw new Error('Content type is required')
+      }
 
-    // Ensure content_data is valid JSON
-    const processedData = {
-      ...contentData,
-      content_data: contentData.content_data || {},
-      tags: contentData.tags || [],
-      tier_required: contentData.tier_required || 'free',
-      is_published: contentData.is_published !== false, // Default to true unless explicitly false
-      view_count: 0,
-      like_count: 0,
-      comment_count: 0,
+      // Ensure content_data is valid JSON
+      const processedData = {
+        ...contentData,
+        content_data: contentData.content_data || {},
+        tags: contentData.tags || [],
+        tier_required: contentData.tier_required || 'free',
+        is_published: contentData.is_published !== false, // Default to true unless explicitly false
+        view_count: 0,
+        like_count: 0,
+        comment_count: 0,
+      }
+
+      console.log('Processed content data for insert:', processedData)
+
+      const { data, error } = await supabase
+        .from('content')
+        .insert([processedData])
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error creating content:', error)
+        throw new Error(`Failed to create content: ${error.message}`)
+      }
+
+      console.log('Content created successfully:', data)
+      return data
+    } catch (error) {
+      console.error('Error in createContent:', error)
+      throw error
     }
-
-    console.log('Processed content data for insert:', processedData)
-
-    const { data, error } = await supabase
-      .from('content')
-      .insert([processedData])
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Error creating content:', error)
-      throw new Error(`Failed to create content: ${error.message}`)
-    }
-
-    console.log('Content created successfully:', data)
-    return data
   },
 
   async updateContent(id: string, updates: Partial<Content>) {
     console.log('Updating content:', id, updates)
     
-    const { data, error } = await supabase
-      .from('content')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('content')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
 
-    if (error) {
-      console.error('Error updating content:', error)
+      if (error) {
+        console.error('Error updating content:', error)
+        throw error
+      }
+      
+      return data
+    } catch (error) {
+      console.error('Error in updateContent:', error)
       throw error
     }
-    
-    return data
   },
 
   async deleteContent(id: string) {
     console.log('Deleting content:', id)
     
-    const { error } = await supabase
-      .from('content')
-      .delete()
-      .eq('id', id)
+    try {
+      const { error } = await supabase
+        .from('content')
+        .delete()
+        .eq('id', id)
 
-    if (error) {
-      console.error('Error deleting content:', error)
+      if (error) {
+        console.error('Error deleting content:', error)
+        throw error
+      }
+    } catch (error) {
+      console.error('Error in deleteContent:', error)
       throw error
     }
   },
@@ -337,118 +392,153 @@ export const contentService = {
   async publishScheduledContent() {
     console.log('Checking for scheduled content to publish...')
     
-    const now = new Date().toISOString()
-    
-    const { data, error } = await supabase
-      .from('content')
-      .update({ 
-        is_published: true,
-        scheduled_publish_at: null 
-      })
-      .eq('is_published', false)
-      .not('scheduled_publish_at', 'is', null)
-      .lte('scheduled_publish_at', now)
-      .select()
+    try {
+      const now = new Date().toISOString()
+      
+      const { data, error } = await supabase
+        .from('content')
+        .update({ 
+          is_published: true,
+          scheduled_publish_at: null 
+        })
+        .eq('is_published', false)
+        .not('scheduled_publish_at', 'is', null)
+        .lte('scheduled_publish_at', now)
+        .select()
 
-    if (error) {
-      console.error('Error publishing scheduled content:', error)
-      throw error
+      if (error) {
+        console.error('Error publishing scheduled content:', error)
+        throw error
+      }
+
+      console.log('Published scheduled content:', data)
+      return data || []
+    } catch (error) {
+      console.error('Error in publishScheduledContent:', error)
+      return []
     }
-
-    console.log('Published scheduled content:', data)
-    return data || []
   }
 }
 
 // Helper functions for subscriptions
 export const subscriptionService = {
   async getCreatorTiers(creatorId: string) {
-    const { data, error } = await supabase
-      .from('subscription_tiers')
-      .select('*')
-      .eq('creator_id', creatorId)
-      .eq('is_active', true)
-      .order('price_monthly', { ascending: true })
+    try {
+      const { data, error } = await supabase
+        .from('subscription_tiers')
+        .select('*')
+        .eq('creator_id', creatorId)
+        .eq('is_active', true)
+        .order('price_monthly', { ascending: true })
 
-    if (error) throw error
-    return data
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('Error in getCreatorTiers:', error)
+      return []
+    }
   },
 
   async createSubscription(subscription: Partial<Subscription>) {
-    const { data, error } = await supabase
-      .from('subscriptions')
-      .insert([subscription])
-      .select()
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .insert([subscription])
+        .select()
+        .single()
 
-    if (error) throw error
-    return data
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Error in createSubscription:', error)
+      throw error
+    }
   },
 
   async getUserSubscriptions(userId: string) {
-    const { data, error } = await supabase
-      .from('subscriptions')
-      .select(`
-        *,
-        subscription_tiers(*),
-        creators(*, profiles(*))
-      `)
-      .eq('user_id', userId)
-      .eq('status', 'active')
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select(`
+          *,
+          subscription_tiers(*),
+          creators(*, profiles(*))
+        `)
+        .eq('user_id', userId)
+        .eq('status', 'active')
 
-    if (error) throw error
-    return data
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('Error in getUserSubscriptions:', error)
+      return []
+    }
   }
 }
 
 // Helper functions for live streaming
 export const streamService = {
   async createStream(stream: Partial<LiveStream>) {
-    const { data, error } = await supabase
-      .from('live_streams')
-      .insert([stream])
-      .select()
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('live_streams')
+        .insert([stream])
+        .select()
+        .single()
 
-    if (error) throw error
-    return data
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Error in createStream:', error)
+      throw error
+    }
   },
 
   async updateStreamStatus(id: string, status: StreamStatus, additionalData?: Partial<LiveStream>) {
-    const updates = { status, ...additionalData }
-    
-    if (status === 'live' && !additionalData?.actual_start) {
-      updates.actual_start = new Date().toISOString()
-    }
-    
-    if (status === 'ended' && !additionalData?.ended_at) {
-      updates.ended_at = new Date().toISOString()
-    }
+    try {
+      const updates = { status, ...additionalData }
+      
+      if (status === 'live' && !additionalData?.actual_start) {
+        updates.actual_start = new Date().toISOString()
+      }
+      
+      if (status === 'ended' && !additionalData?.ended_at) {
+        updates.ended_at = new Date().toISOString()
+      }
 
-    const { data, error } = await supabase
-      .from('live_streams')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single()
+      const { data, error } = await supabase
+        .from('live_streams')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
 
-    if (error) throw error
-    return data
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Error in updateStreamStatus:', error)
+      throw error
+    }
   },
 
   async getUpcomingStreams(limit = 10) {
-    const { data, error } = await supabase
-      .from('live_streams')
-      .select(`
-        *,
-        creators(*, profiles(*))
-      `)
-      .in('status', ['scheduled', 'live'])
-      .order('scheduled_start', { ascending: true })
-      .limit(limit)
+    try {
+      const { data, error } = await supabase
+        .from('live_streams')
+        .select(`
+          *,
+          creators(*, profiles(*))
+        `)
+        .in('status', ['scheduled', 'live'])
+        .order('scheduled_start', { ascending: true })
+        .limit(limit)
 
-    if (error) throw error
-    return data
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('Error in getUpcomingStreams:', error)
+      return []
+    }
   }
 }
 
