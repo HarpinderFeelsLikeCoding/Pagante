@@ -70,14 +70,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (!mounted) return
 
-      // Handle different auth events
-      if (event === 'SIGNED_OUT') {
-        setUser(null)
-        setProfile(null)
-        setLoading(false)
-        return
-      }
-
       // Don't refetch profile on token refresh
       if (event === 'TOKEN_REFRESHED') {
         return
@@ -87,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
         await fetchProfile(session.user.id)
-      } else if (!session?.user) {
+      } else {
         setProfile(null)
         setLoading(false)
       }
