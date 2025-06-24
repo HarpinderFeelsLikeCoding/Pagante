@@ -162,25 +162,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchOrCreateProfile = async (user: User) => {
     try {
       console.log('Fetching profile for user:', user.id)
+      console.log('User email:', user.email)
       
-      const { data, error } = await supabase
+      // First, let's try a direct query with better error handling
+      const { data, error, count } = await supabase
         .from('profiles')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('id', user.id)
-        .maybeSingle()
+
+      console.log('Profile query result:', { data, error, count })
 
       if (error) {
         console.error('Error fetching profile:', error)
-        // Try to create profile if fetch fails
-        await createProfileForUser(user)
-        return
+        console.error('Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        })
+        
+        // If it's an RLS error or permission error, try creating profile
+        if (error.code === 'PGRST301' || error.message.includes('permission') || error.message.includes('policy')) {
+          console.log('Looks like an RLS/permission issue, trying to create profile...')
+          await createProfileForUser(user)
+          return
+        }
+        
+        throw error
       }
 
-      if (data) {
-        console.log('Profile found:', data.username)
-        setProfile(data)
+      if (data && data.length > 0) {
+        console.log('Profile found:', data[0].username)
+        setProfile(data[0])
       } else {
-        console.log('No profile found for user, creating one...')
+        console.log('No profile found for user (count:', count, '), creating one...')
         await createProfileForUser(user)
       }
     } catch (error) {
@@ -197,37 +212,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Generate a username from email
       const username = user.email?.split('@')[0] || `user_${user.id.slice(0, 8)}`
       
-      const { data: profileData, error: profileError } = await supabase
+      const profileData = {
+        id: user.id,
+        email: user.email!,
+        username: username,
+        full_name: username, // Use username as full_name for now
+        role: 'user' as const,
+      }
+
+      console.log('Attempting to insert profile:', profileData)
+
+      const { data: insertData, error: profileError } = await supabase
         .from('profiles')
-        .insert([
-          {
-            id: user.id,
-            email: user.email!,
-            username: username,
-            full_name: username, // Use username as full_name for now
-            role: 'user',
-          },
-        ])
+        .insert([profileData])
         .select()
         .single()
 
       if (profileError) {
         console.error('Profile creation error:', profileError)
+        console.error('Profile creation error details:', {
+          code: profileError.code,
+          message: profileError.message,
+          details: profileError.details,
+          hint: profileError.hint
+        })
         
         if (profileError.code === '23505') {
           // Unique constraint violation - try with a random suffix
           const randomSuffix = Math.random().toString(36).substring(2, 8)
           const uniqueUsername = `${username}_${randomSuffix}`
           
+          console.log('Username conflict, trying with unique username:', uniqueUsername)
+          
           const { data: retryData, error: retryError } = await supabase
             .from('profiles')
             .insert([
               {
-                id: user.id,
-                email: user.email!,
+                ...profileData,
                 username: uniqueUsername,
                 full_name: uniqueUsername,
-                role: 'user',
               },
             ])
             .select()
@@ -245,7 +268,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } else {
         console.log('Profile created successfully:', username)
-        setProfile(profileData)
+        setProfile(insertData)
       }
     } catch (error) {
       console.error('Failed to create profile for user:', error)
