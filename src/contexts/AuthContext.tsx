@@ -25,12 +25,42 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(false) // Only true during active operations
-  const [initialized, setInitialized] = useState(true) // Start as initialized since we don't persist sessions
+  const [loading, setLoading] = useState(true) // Start with loading true
+  const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {
     let mounted = true
     let sessionTimeout: NodeJS.Timeout | null = null
+
+    // Initialize auth state
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (mounted) {
+          if (session?.user) {
+            console.log('Found existing session for user:', session.user.id)
+            setUser(session.user)
+            await fetchProfile(session.user.id)
+            setupSessionTimeout()
+          } else {
+            console.log('No existing session found')
+            setUser(null)
+            setProfile(null)
+          }
+          setInitialized(true)
+          setLoading(false)
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error)
+        if (mounted) {
+          setUser(null)
+          setProfile(null)
+          setInitialized(true)
+          setLoading(false)
+        }
+      }
+    }
 
     // Set up session timeout (2 hours of inactivity)
     const setupSessionTimeout = () => {
@@ -59,16 +89,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!mounted) return
 
       if (event === 'SIGNED_IN' && session?.user) {
+        console.log('User signed in:', session.user.id)
         setUser(session.user)
         await fetchProfile(session.user.id)
-        setupSessionTimeout() // Start session timeout
+        setupSessionTimeout()
+        setLoading(false)
       } else if (event === 'SIGNED_OUT') {
+        console.log('User signed out')
         setUser(null)
         setProfile(null)
         if (sessionTimeout) {
           clearTimeout(sessionTimeout)
           sessionTimeout = null
         }
+        setLoading(false)
       }
     })
 
@@ -76,8 +110,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const handleBeforeUnload = async () => {
       if (user) {
         console.log('Tab/window closing - signing out user')
-        // Use sendBeacon for reliable logout on page unload
-        navigator.sendBeacon('/api/logout') // This would need a backend endpoint
         await supabase.auth.signOut()
       }
     }
@@ -108,6 +140,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener('beforeunload', handleBeforeUnload)
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
+    // Initialize auth state
+    initializeAuth()
+
     return () => {
       mounted = false
       subscription.unsubscribe()
@@ -122,7 +157,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         document.removeEventListener(event, resetSessionTimeout)
       })
     }
-  }, [user])
+  }, [])
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -246,13 +281,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('No user data returned from sign in')
       }
 
-      console.log('Sign in successful')
+      console.log('Sign in successful for user:', data.user.id)
+      
+      // The auth state change listener will handle setting user and profile
+      // Don't set loading to false here, let the listener handle it
       
     } catch (err: any) {
       console.error('Sign in error:', err)
+      setLoading(false) // Only set loading false on error
       throw err
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -283,11 +320,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     profile,
-    loading, // Only true during active sign in/out operations
+    loading,
     signUp,
     signIn,
     signOut,
     refreshProfile,
+  }
+
+  // Don't render children until auth is initialized
+  if (!initialized) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-gray-600">Initializing...</div>
+        </div>
+      </div>
+    )
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

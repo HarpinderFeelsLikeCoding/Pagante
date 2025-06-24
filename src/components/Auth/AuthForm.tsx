@@ -24,7 +24,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   useEffect(() => {
     if (user && profile && !authLoading) {
       console.log('User already authenticated, redirecting to dashboard')
-      navigate('/dashboard')
+      navigate('/dashboard', { replace: true })
     }
   }, [user, profile, authLoading, navigate])
 
@@ -36,12 +36,15 @@ export function AuthForm({ mode }: AuthFormProps) {
 
     try {
       if (mode === 'login') {
+        console.log('Attempting login for:', formData.email)
         await signIn(formData.email, formData.password)
         setSuccess('Successfully signed in! Redirecting...')
-        // Navigate immediately after successful sign in
+        
+        // Wait a moment for auth state to update, then navigate
         setTimeout(() => {
-          navigate('/dashboard')
-        }, 500) // Shorter delay
+          navigate('/dashboard', { replace: true })
+        }, 1000)
+        
       } else {
         // Validate required fields for registration
         if (!formData.username.trim()) {
@@ -57,6 +60,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           throw new Error('Password must be at least 6 characters long')
         }
 
+        console.log('Attempting registration for:', formData.email)
         await signUp(formData.email, formData.password, {
           username: formData.username.trim(),
           full_name: formData.fullName.trim(),
@@ -64,10 +68,11 @@ export function AuthForm({ mode }: AuthFormProps) {
         })
         
         setSuccess('Account created successfully! Redirecting...')
-        // Navigate immediately after successful sign up
+        
+        // Wait a moment for auth state to update, then navigate
         setTimeout(() => {
-          navigate('/dashboard')
-        }, 500) // Shorter delay
+          navigate('/dashboard', { replace: true })
+        }, 1000)
       }
     } catch (err: any) {
       console.error('Auth error:', err)

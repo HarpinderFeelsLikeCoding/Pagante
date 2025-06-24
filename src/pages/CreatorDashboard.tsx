@@ -33,16 +33,18 @@ export function CreatorDashboard() {
   })
 
   useEffect(() => {
+    // Redirect to login if not authenticated
     if (!authLoading && !user) {
       console.log('No user found, redirecting to login')
-      navigate('/login')
+      navigate('/login', { replace: true })
       return
     }
 
-    if (profile && !creator && !loadingCreator && !error) {
+    // Load creator profile once we have a user profile
+    if (user && profile && !creator && !loadingCreator && !error) {
       loadCreatorProfile()
     }
-  }, [profile, authLoading, user, navigate, creator, loadingCreator, error])
+  }, [user, profile, authLoading, navigate, creator, loadingCreator, error])
 
   const loadCreatorProfile = async () => {
     if (!profile) return
@@ -159,6 +161,19 @@ export function CreatorDashboard() {
     { title: 'Monthly earnings goal', current: 2456, target: 3000, reward: 'Bonus content series' },
   ]
 
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-gray-600">Loading...</div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading while creator profile is loading
   if (loadingCreator) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -192,7 +207,7 @@ export function CreatorDashboard() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <div className="text-gray-600">Loading dashboard...</div>
+          <div className="text-gray-600">Setting up your dashboard...</div>
         </div>
       </div>
     )
