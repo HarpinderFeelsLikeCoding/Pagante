@@ -25,31 +25,12 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [initialized, setInitialized] = useState(false)
+  const [loading, setLoading] = useState(false) // Only true during active operations
+  const [initialized, setInitialized] = useState(true) // Start as initialized since we don't persist sessions
 
   useEffect(() => {
     let mounted = true
     let sessionTimeout: NodeJS.Timeout | null = null
-
-    const initializeAuth = async () => {
-      try {
-        console.log('Initializing auth - starting fresh session')
-        
-        // Since we disabled session persistence, always start fresh
-        setUser(null)
-        setProfile(null)
-        
-        if (mounted) {
-          setInitialized(true)
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error)
-        if (mounted) {
-          setInitialized(true)
-        }
-      }
-    }
 
     // Set up session timeout (2 hours of inactivity)
     const setupSessionTimeout = () => {
@@ -70,8 +51,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setupSessionTimeout()
       }
     }
-
-    initializeAuth()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -304,7 +283,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     profile,
-    loading: !initialized || loading,
+    loading, // Only true during active sign in/out operations
     signUp,
     signIn,
     signOut,

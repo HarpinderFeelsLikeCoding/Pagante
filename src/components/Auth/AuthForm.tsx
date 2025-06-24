@@ -38,10 +38,10 @@ export function AuthForm({ mode }: AuthFormProps) {
       if (mode === 'login') {
         await signIn(formData.email, formData.password)
         setSuccess('Successfully signed in! Redirecting...')
-        // Wait a moment for auth state to update, then navigate
+        // Navigate immediately after successful sign in
         setTimeout(() => {
           navigate('/dashboard')
-        }, 1000)
+        }, 500) // Shorter delay
       } else {
         // Validate required fields for registration
         if (!formData.username.trim()) {
@@ -64,10 +64,10 @@ export function AuthForm({ mode }: AuthFormProps) {
         })
         
         setSuccess('Account created successfully! Redirecting...')
-        // Wait a moment for auth state to update, then navigate
+        // Navigate immediately after successful sign up
         setTimeout(() => {
           navigate('/dashboard')
-        }, 1000)
+        }, 500) // Shorter delay
       }
     } catch (err: any) {
       console.error('Auth error:', err)

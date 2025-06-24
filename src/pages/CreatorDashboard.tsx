@@ -17,18 +17,18 @@ export function CreatorDashboard() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    // Redirect to login if not authenticated and auth is not loading
+    // Only redirect if we're sure there's no user and auth is not loading
     if (!authLoading && !user) {
       console.log('No user found, redirecting to login')
       navigate('/login')
       return
     }
 
-    // Load creator profile if we have a profile and auth is not loading
-    if (profile && !authLoading && !creator && !loadingCreator) {
+    // Load creator profile if we have a profile and haven't loaded creator yet
+    if (profile && !creator && !loadingCreator && !error) {
       loadCreatorProfile()
     }
-  }, [profile, authLoading, user, navigate, creator, loadingCreator])
+  }, [profile, authLoading, user, navigate, creator, loadingCreator, error])
 
   const loadCreatorProfile = async () => {
     if (!profile) return
@@ -121,23 +121,6 @@ export function CreatorDashboard() {
     )
   }
 
-  // Show message if no profile is found and auth is not loading
-  if (!authLoading && !profile) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-gray-600 text-lg mb-2">Please log in to access your dashboard</div>
-          <button
-            onClick={() => navigate('/login')}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   // Show error if there was a problem loading the creator profile
   if (error) {
     return (
@@ -156,7 +139,7 @@ export function CreatorDashboard() {
     )
   }
 
-  // Don't render the dashboard until we have both profile and creator data
+  // Show loading if we don't have the required data yet
   if (!profile || !creator) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
