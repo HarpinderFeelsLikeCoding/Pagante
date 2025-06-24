@@ -34,19 +34,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       try {
         console.log('Initializing auth...')
-        const { data: { session }, error } = await supabase.auth.getSession()
         
-        if (error) {
-          console.error('Error getting session:', error)
-        }
-
+        // Since we disabled session persistence, there should be no session on page load
+        // This ensures users start fresh each time
+        setUser(null)
+        setProfile(null)
+        
         if (mounted) {
-          setUser(session?.user ?? null)
-          
-          if (session?.user) {
-            await fetchProfile(session.user.id)
-          }
-          
           setInitialized(true)
         }
       } catch (error) {
@@ -59,26 +53,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     initializeAuth()
 
-    // Listen for auth changes
+    // Listen for auth changes (only for active sign in/out during session)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.id || 'No user')
       
       if (!mounted) return
 
-      setUser(session?.user ?? null)
-      
-      if (session?.user && event === 'SIGNED_IN') {
+      if (event === 'SIGNED_IN' && session?.user) {
+        setUser(session.user)
         await fetchProfile(session.user.id)
-      } else if (!session?.user) {
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null)
         setProfile(null)
       }
     })
 
+    // Handle tab/window close - automatically sign out
+    const handleBeforeUnload = async () => {
+      if (user) {
+        console.log('Tab/window closing - signing out user')
+        await supabase.auth.signOut()
+      }
+    }
+
+    // Handle page visibility change - sign out when tab becomes hidden
+    const handleVisibilityChange = async () => {
+      if (document.hidden && user) {
+        console.log('Tab hidden - signing out user')
+        await supabase.auth.signOut()
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
     return () => {
       mounted = false
       subscription.unsubscribe()
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [])
+  }, [user])
 
   const fetchProfile = async (userId: string) => {
     try {

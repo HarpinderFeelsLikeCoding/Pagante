@@ -110,6 +110,11 @@ export function AuthForm({ mode }: AuthFormProps) {
               : 'Join the democratic creator platform'
             }
           </p>
+          <div className="mt-4 p-3 bg-orange-900/50 border border-orange-500 rounded-lg">
+            <p className="text-orange-200 text-sm">
+              <strong>Session-Only Login:</strong> You'll be automatically logged out when you close this tab or window.
+            </p>
+          </div>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
