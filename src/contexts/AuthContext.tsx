@@ -25,8 +25,8 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(false) // Start with false to avoid initial loading
-  const [initializing, setInitializing] = useState(true)
+  const [loading, setLoading] = useState(false) // Only true during active operations
+  const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -38,32 +38,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (error) {
           console.error('Error getting session:', error)
-          if (mounted) {
-            setUser(null)
-            setProfile(null)
-            setInitializing(false)
-          }
-          return
         }
 
-        console.log('Initial session:', session?.user?.id || 'No session')
-        
         if (mounted) {
           setUser(session?.user ?? null)
           
           if (session?.user) {
             await fetchProfile(session.user.id)
-          } else {
-            setProfile(null)
           }
-          setInitializing(false)
+          
+          setInitialized(true)
         }
       } catch (error) {
         console.error('Error initializing auth:', error)
         if (mounted) {
-          setUser(null)
-          setProfile(null)
-          setInitializing(false)
+          setInitialized(true)
         }
       }
     }
@@ -76,41 +65,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (!mounted) return
 
-      try {
-        // Handle different auth events
-        if (event === 'SIGNED_OUT') {
-          setUser(null)
-          setProfile(null)
-          setLoading(false)
-          return
-        }
-
-        if (event === 'TOKEN_REFRESHED') {
-          // Don't refetch profile on token refresh, just update user
-          setUser(session?.user ?? null)
-          return
-        }
-
-        if (event === 'SIGNED_IN') {
-          setUser(session?.user ?? null)
-          if (session?.user) {
-            setLoading(true)
-            await fetchProfile(session.user.id)
-          } else {
-            setProfile(null)
-            setLoading(false)
-          }
-          return
-        }
-
-        // For other events, update user state
-        setUser(session?.user ?? null)
-        if (!session?.user) {
-          setProfile(null)
-        }
-      } catch (error) {
-        console.error('Error in auth state change:', error)
-        setLoading(false)
+      setUser(session?.user ?? null)
+      
+      if (session?.user && event === 'SIGNED_IN') {
+        await fetchProfile(session.user.id)
+      } else if (!session?.user) {
+        setProfile(null)
       }
     })
 
@@ -132,9 +92,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('Error fetching profile:', error)
-        if (error.code === 'PGRST116') {
-          console.log('Profile not found - user may need to complete registration')
-        }
         setProfile(null)
       } else if (data) {
         console.log('Profile found:', data.username)
@@ -146,14 +103,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Unexpected error fetching profile:', error)
       setProfile(null)
-    } finally {
-      setLoading(false)
     }
   }
 
   const refreshProfile = async () => {
     if (user) {
-      setLoading(true)
       await fetchProfile(user.id)
     }
   }
@@ -249,12 +203,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log('Sign in successful')
-      // Don't set loading to false here - let the auth state change handler do it
       
     } catch (err: any) {
       console.error('Sign in error:', err)
-      setLoading(false)
       throw err
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -282,12 +236,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Show children immediately if we're not initializing
-  // Only show loading during active operations (sign in, sign up, etc.)
   const value = {
     user,
     profile,
-    loading: initializing || loading,
+    loading: !initialized || loading, // Show loading until initialized OR during operations
     signUp,
     signIn,
     signOut,

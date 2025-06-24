@@ -13,27 +13,27 @@ export function CreatorDashboard() {
   const navigate = useNavigate()
   const [creator, setCreator] = useState<Creator | null>(null)
   const [activeTab, setActiveTab] = useState('overview')
-  const [loading, setLoading] = useState(false) // Don't start with loading true
+  const [loadingCreator, setLoadingCreator] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    // Only redirect if we're sure there's no user and auth is not loading
+    // Only redirect if auth is not loading and we're sure there's no user
     if (!authLoading && !user) {
       navigate('/login')
       return
     }
 
-    // Only load creator profile if we have a profile and auth is not loading
-    if (profile && !authLoading) {
+    // Load creator profile if we have a profile and auth is not loading
+    if (profile && !authLoading && !creator) {
       loadCreatorProfile()
     }
-  }, [profile, authLoading, user, navigate])
+  }, [profile, authLoading, user, navigate, creator])
 
   const loadCreatorProfile = async () => {
     if (!profile) return
 
     try {
-      setLoading(true)
+      setLoadingCreator(true)
       setError('')
       
       console.log('Loading creator profile for user:', profile.id)
@@ -76,7 +76,7 @@ export function CreatorDashboard() {
       console.error('Error in loadCreatorProfile:', error)
       setError('Failed to load creator profile: ' + error.message)
     } finally {
-      setLoading(false)
+      setLoadingCreator(false)
     }
   }
 
@@ -108,13 +108,13 @@ export function CreatorDashboard() {
     { type: 'stream', user: 'David Wilson', action: 'joined your live stream', time: '1 day ago' },
   ]
 
-  // Show loading only when we're actively loading creator data
-  if (loading) {
+  // Show loading only when actively loading creator data
+  if (loadingCreator) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <div className="text-gray-600">Loading dashboard...</div>
+          <div className="text-gray-600">Loading creator profile...</div>
         </div>
       </div>
     )

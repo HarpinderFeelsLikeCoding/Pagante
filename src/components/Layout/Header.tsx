@@ -61,7 +61,8 @@ export function Header() {
           </div>
 
           <div className="flex items-center space-x-4">
-            {loading ? (
+            {/* Only show loading spinner during active operations, not initialization */}
+            {loading && profile ? (
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gold-400"></div>
             ) : profile ? (
               <>
