@@ -13,16 +13,17 @@ export function CreatorDashboard() {
   const navigate = useNavigate()
   const [creator, setCreator] = useState<Creator | null>(null)
   const [activeTab, setActiveTab] = useState('overview')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false) // Don't start with loading true
   const [error, setError] = useState('')
 
   useEffect(() => {
-    // Redirect to login if not authenticated
+    // Only redirect if we're sure there's no user and auth is not loading
     if (!authLoading && !user) {
       navigate('/login')
       return
     }
 
+    // Only load creator profile if we have a profile and auth is not loading
     if (profile && !authLoading) {
       loadCreatorProfile()
     }
@@ -107,8 +108,8 @@ export function CreatorDashboard() {
     { type: 'stream', user: 'David Wilson', action: 'joined your live stream', time: '1 day ago' },
   ]
 
-  // Show loading while auth is loading or while we're fetching creator data
-  if (authLoading || loading) {
+  // Show loading only when we're actively loading creator data
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -119,8 +120,8 @@ export function CreatorDashboard() {
     )
   }
 
-  // Show message if no profile is found
-  if (!profile) {
+  // Show message if no profile is found and auth is not loading
+  if (!authLoading && !profile) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -154,20 +155,9 @@ export function CreatorDashboard() {
     )
   }
 
-  if (!creator) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-600 text-lg mb-2">Creator profile not found</div>
-          <button
-            onClick={loadCreatorProfile}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    )
+  // Don't render the dashboard until we have both profile and creator data
+  if (!profile || !creator) {
+    return null // Return nothing while waiting for data
   }
 
   return (

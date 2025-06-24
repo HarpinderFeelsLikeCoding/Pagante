@@ -38,12 +38,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       if (mode === 'login') {
         await signIn(formData.email, formData.password)
         setSuccess('Successfully signed in! Redirecting...')
-        // Don't navigate immediately - let the auth context handle it
-        setTimeout(() => {
-          if (user && profile) {
-            navigate('/dashboard')
-          }
-        }, 1500)
+        // Navigation will happen automatically via useEffect when auth state updates
       } else {
         // Validate required fields for registration
         if (!formData.username.trim()) {
@@ -66,11 +61,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         })
         
         setSuccess('Account created successfully! Redirecting...')
-        setTimeout(() => {
-          if (user && profile) {
-            navigate('/dashboard')
-          }
-        }, 1500)
+        // Navigation will happen automatically via useEffect when auth state updates
       }
     } catch (err: any) {
       console.error('Auth error:', err)
@@ -91,7 +82,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   // Show loading state if auth is processing
   const isLoading = loading || authLoading
 
-  // Show loading screen if already authenticated
+  // Show loading screen if already authenticated (brief moment before redirect)
   if (user && profile && !authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-navy-900 via-navy-800 to-blue-900 flex items-center justify-center">
