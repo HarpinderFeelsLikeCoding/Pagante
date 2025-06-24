@@ -26,7 +26,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
-  const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -42,7 +41,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(null)
             setProfile(null)
             setLoading(false)
-            setInitialized(true)
           }
           return
         }
@@ -58,7 +56,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setProfile(null)
             setLoading(false)
           }
-          setInitialized(true)
         }
       } catch (error) {
         console.error('Error initializing auth:', error)
@@ -66,7 +63,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null)
           setProfile(null)
           setLoading(false)
-          setInitialized(true)
         }
       }
     }
@@ -77,37 +73,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.id || 'No user')
       
-      if (!mounted || !initialized) return
+      if (!mounted) return
 
-      // Handle different auth events
-      if (event === 'SIGNED_OUT') {
-        setUser(null)
-        setProfile(null)
-        setLoading(false)
-        return
-      }
+      try {
+        setLoading(true)
 
-      if (event === 'TOKEN_REFRESHED') {
-        // Don't refetch profile on token refresh, just update user
+        // Handle different auth events
+        if (event === 'SIGNED_OUT') {
+          setUser(null)
+          setProfile(null)
+          setLoading(false)
+          return
+        }
+
+        if (event === 'TOKEN_REFRESHED') {
+          // Don't refetch profile on token refresh, just update user
+          setUser(session?.user ?? null)
+          setLoading(false)
+          return
+        }
+
+        if (event === 'SIGNED_IN') {
+          setUser(session?.user ?? null)
+          if (session?.user) {
+            await fetchProfile(session.user.id)
+          } else {
+            setProfile(null)
+            setLoading(false)
+          }
+          return
+        }
+
+        // For other events, update user state
         setUser(session?.user ?? null)
-        return
-      }
-
-      if (event === 'SIGNED_IN') {
-        setUser(session?.user ?? null)
-        if (session?.user) {
-          await fetchProfile(session.user.id)
-        } else {
+        if (!session?.user) {
           setProfile(null)
           setLoading(false)
         }
-        return
-      }
-
-      // For other events, update user state
-      setUser(session?.user ?? null)
-      if (!session?.user) {
-        setProfile(null)
+      } catch (error) {
+        console.error('Error in auth state change:', error)
         setLoading(false)
       }
     })
@@ -247,6 +251,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       console.log('Sign in successful')
+      // Don't set loading to false here - let the auth state change handler do it
       
     } catch (err: any) {
       console.error('Sign in error:', err)

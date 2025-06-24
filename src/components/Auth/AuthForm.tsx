@@ -38,7 +38,12 @@ export function AuthForm({ mode }: AuthFormProps) {
       if (mode === 'login') {
         await signIn(formData.email, formData.password)
         setSuccess('Successfully signed in! Redirecting...')
-        setTimeout(() => navigate('/dashboard'), 1000)
+        // Don't navigate immediately - let the auth context handle it
+        setTimeout(() => {
+          if (user && profile) {
+            navigate('/dashboard')
+          }
+        }, 1500)
       } else {
         // Validate required fields for registration
         if (!formData.username.trim()) {
@@ -61,7 +66,11 @@ export function AuthForm({ mode }: AuthFormProps) {
         })
         
         setSuccess('Account created successfully! Redirecting...')
-        setTimeout(() => navigate('/dashboard'), 1000)
+        setTimeout(() => {
+          if (user && profile) {
+            navigate('/dashboard')
+          }
+        }, 1500)
       }
     } catch (err: any) {
       console.error('Auth error:', err)
@@ -243,7 +252,9 @@ export function AuthForm({ mode }: AuthFormProps) {
               {isLoading ? (
                 <div className="flex items-center space-x-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Processing...</span>
+                  <span>
+                    {mode === 'login' ? 'Signing in...' : 'Creating account...'}
+                  </span>
                 </div>
               ) : (
                 mode === 'login' ? 'Sign In' : 'Create Account'
