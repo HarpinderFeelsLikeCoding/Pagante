@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (session?.user) {
             console.log('Found existing session for user:', session.user.id)
             setUser(session.user)
-            await fetchProfile(session.user.id)
+            await fetchOrCreateProfile(session.user)
             setupSessionTimeout()
           } else {
             console.log('No existing session found')
@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (event === 'SIGNED_IN' && session?.user) {
         console.log('User signed in:', session.user.id)
         setUser(session.user)
-        await fetchProfile(session.user.id)
+        await fetchOrCreateProfile(session.user)
         setupSessionTimeout()
         setLoading(false)
       } else if (event === 'SIGNED_OUT') {
@@ -159,35 +159,104 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  const fetchProfile = async (userId: string) => {
+  const fetchOrCreateProfile = async (user: User) => {
     try {
-      console.log('Fetching profile for user:', userId)
+      console.log('Fetching profile for user:', user.id)
       
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', user.id)
         .maybeSingle()
 
       if (error) {
         console.error('Error fetching profile:', error)
-        setProfile(null)
-      } else if (data) {
+        // Try to create profile if fetch fails
+        await createProfileForUser(user)
+        return
+      }
+
+      if (data) {
         console.log('Profile found:', data.username)
         setProfile(data)
       } else {
-        console.log('No profile found for user')
-        setProfile(null)
+        console.log('No profile found for user, creating one...')
+        await createProfileForUser(user)
       }
     } catch (error) {
       console.error('Unexpected error fetching profile:', error)
+      // Try to create profile as fallback
+      await createProfileForUser(user)
+    }
+  }
+
+  const createProfileForUser = async (user: User) => {
+    try {
+      console.log('Creating profile for existing user:', user.id)
+      
+      // Generate a username from email
+      const username = user.email?.split('@')[0] || `user_${user.id.slice(0, 8)}`
+      
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: user.id,
+            email: user.email!,
+            username: username,
+            full_name: username, // Use username as full_name for now
+            role: 'user',
+          },
+        ])
+        .select()
+        .single()
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError)
+        
+        if (profileError.code === '23505') {
+          // Unique constraint violation - try with a random suffix
+          const randomSuffix = Math.random().toString(36).substring(2, 8)
+          const uniqueUsername = `${username}_${randomSuffix}`
+          
+          const { data: retryData, error: retryError } = await supabase
+            .from('profiles')
+            .insert([
+              {
+                id: user.id,
+                email: user.email!,
+                username: uniqueUsername,
+                full_name: uniqueUsername,
+                role: 'user',
+              },
+            ])
+            .select()
+            .single()
+
+          if (retryError) {
+            console.error('Retry profile creation error:', retryError)
+            throw retryError
+          }
+          
+          console.log('Profile created with unique username:', uniqueUsername)
+          setProfile(retryData)
+        } else {
+          throw profileError
+        }
+      } else {
+        console.log('Profile created successfully:', username)
+        setProfile(profileData)
+      }
+    } catch (error) {
+      console.error('Failed to create profile for user:', error)
+      // Set profile to null so user can still access the app
       setProfile(null)
     }
   }
 
   const refreshProfile = async () => {
     if (user) {
-      await fetchProfile(user.id)
+      await fetchOrCreateProfile(user)
     }
   }
 
