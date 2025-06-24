@@ -25,18 +25,18 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(false) // Only true during active operations
+  const [loading, setLoading] = useState(false)
   const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {
     let mounted = true
+    let sessionTimeout: NodeJS.Timeout | null = null
 
     const initializeAuth = async () => {
       try {
-        console.log('Initializing auth...')
+        console.log('Initializing auth - starting fresh session')
         
-        // Since we disabled session persistence, there should be no session on page load
-        // This ensures users start fresh each time
+        // Since we disabled session persistence, always start fresh
         setUser(null)
         setProfile(null)
         
@@ -51,9 +51,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    // Set up session timeout (2 hours of inactivity)
+    const setupSessionTimeout = () => {
+      if (sessionTimeout) {
+        clearTimeout(sessionTimeout)
+      }
+      
+      // Auto logout after 2 hours of inactivity
+      sessionTimeout = setTimeout(async () => {
+        console.log('Session timeout - signing out user')
+        await signOut()
+      }, 2 * 60 * 60 * 1000) // 2 hours
+    }
+
+    // Reset timeout on user activity
+    const resetSessionTimeout = () => {
+      if (user) {
+        setupSessionTimeout()
+      }
+    }
+
     initializeAuth()
 
-    // Listen for auth changes (only for active sign in/out during session)
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state change:', event, session?.user?.id || 'No user')
       
@@ -62,9 +82,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (event === 'SIGNED_IN' && session?.user) {
         setUser(session.user)
         await fetchProfile(session.user.id)
+        setupSessionTimeout() // Start session timeout
       } else if (event === 'SIGNED_OUT') {
         setUser(null)
         setProfile(null)
+        if (sessionTimeout) {
+          clearTimeout(sessionTimeout)
+          sessionTimeout = null
+        }
       }
     })
 
@@ -72,17 +97,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const handleBeforeUnload = async () => {
       if (user) {
         console.log('Tab/window closing - signing out user')
+        // Use sendBeacon for reliable logout on page unload
+        navigator.sendBeacon('/api/logout') // This would need a backend endpoint
         await supabase.auth.signOut()
       }
     }
 
-    // Handle page visibility change - sign out when tab becomes hidden
-    const handleVisibilityChange = async () => {
+    // Handle page visibility change - sign out when tab becomes hidden for too long
+    let visibilityTimeout: NodeJS.Timeout | null = null
+    const handleVisibilityChange = () => {
       if (document.hidden && user) {
-        console.log('Tab hidden - signing out user')
-        await supabase.auth.signOut()
+        // Give user 30 seconds before logging out when tab is hidden
+        visibilityTimeout = setTimeout(async () => {
+          console.log('Tab hidden too long - signing out user')
+          await supabase.auth.signOut()
+        }, 30000) // 30 seconds
+      } else if (!document.hidden && visibilityTimeout) {
+        // Cancel logout if user comes back to tab
+        clearTimeout(visibilityTimeout)
+        visibilityTimeout = null
+        resetSessionTimeout() // Reset the main session timeout
       }
     }
+
+    // Listen for user activity to reset session timeout
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click']
+    activityEvents.forEach(event => {
+      document.addEventListener(event, resetSessionTimeout, { passive: true })
+    })
 
     window.addEventListener('beforeunload', handleBeforeUnload)
     document.addEventListener('visibilitychange', handleVisibilityChange)
@@ -90,8 +132,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       mounted = false
       subscription.unsubscribe()
+      
+      if (sessionTimeout) clearTimeout(sessionTimeout)
+      if (visibilityTimeout) clearTimeout(visibilityTimeout)
+      
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
+      
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, resetSessionTimeout)
+      })
     }
   }, [user])
 
@@ -254,7 +304,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     profile,
-    loading: !initialized || loading, // Show loading until initialized OR during operations
+    loading: !initialized || loading,
     signUp,
     signIn,
     signOut,

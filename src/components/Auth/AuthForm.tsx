@@ -38,7 +38,10 @@ export function AuthForm({ mode }: AuthFormProps) {
       if (mode === 'login') {
         await signIn(formData.email, formData.password)
         setSuccess('Successfully signed in! Redirecting...')
-        // Navigation will happen automatically via useEffect when auth state updates
+        // Wait a moment for auth state to update, then navigate
+        setTimeout(() => {
+          navigate('/dashboard')
+        }, 1000)
       } else {
         // Validate required fields for registration
         if (!formData.username.trim()) {
@@ -61,7 +64,10 @@ export function AuthForm({ mode }: AuthFormProps) {
         })
         
         setSuccess('Account created successfully! Redirecting...')
-        // Navigation will happen automatically via useEffect when auth state updates
+        // Wait a moment for auth state to update, then navigate
+        setTimeout(() => {
+          navigate('/dashboard')
+        }, 1000)
       }
     } catch (err: any) {
       console.error('Auth error:', err)
@@ -82,7 +88,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   // Show loading state if auth is processing
   const isLoading = loading || authLoading
 
-  // Show loading screen if already authenticated (brief moment before redirect)
+  // Show loading screen if already authenticated
   if (user && profile && !authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-navy-900 via-navy-800 to-blue-900 flex items-center justify-center">
@@ -110,9 +116,12 @@ export function AuthForm({ mode }: AuthFormProps) {
               : 'Join the democratic creator platform'
             }
           </p>
+          
+          {/* Session info notice */}
           <div className="mt-4 p-3 bg-orange-900/50 border border-orange-500 rounded-lg">
             <p className="text-orange-200 text-sm">
-              <strong>Session-Only Login:</strong> You'll be automatically logged out when you close this tab or window.
+              <strong>Session-Only Login:</strong> You'll stay logged in for 2 hours of activity, 
+              or until you close this tab/window.
             </p>
           </div>
         </div>

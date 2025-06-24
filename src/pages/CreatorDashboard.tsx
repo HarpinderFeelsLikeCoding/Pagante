@@ -17,17 +17,18 @@ export function CreatorDashboard() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    // Only redirect if auth is not loading and we're sure there's no user
+    // Redirect to login if not authenticated and auth is not loading
     if (!authLoading && !user) {
+      console.log('No user found, redirecting to login')
       navigate('/login')
       return
     }
 
     // Load creator profile if we have a profile and auth is not loading
-    if (profile && !authLoading && !creator) {
+    if (profile && !authLoading && !creator && !loadingCreator) {
       loadCreatorProfile()
     }
-  }, [profile, authLoading, user, navigate, creator])
+  }, [profile, authLoading, user, navigate, creator, loadingCreator])
 
   const loadCreatorProfile = async () => {
     if (!profile) return
@@ -108,7 +109,7 @@ export function CreatorDashboard() {
     { type: 'stream', user: 'David Wilson', action: 'joined your live stream', time: '1 day ago' },
   ]
 
-  // Show loading only when actively loading creator data
+  // Show loading while actively loading creator data
   if (loadingCreator) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -157,7 +158,14 @@ export function CreatorDashboard() {
 
   // Don't render the dashboard until we have both profile and creator data
   if (!profile || !creator) {
-    return null // Return nothing while waiting for data
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-gray-600">Loading dashboard...</div>
+        </div>
+      </div>
+    )
   }
 
   return (
