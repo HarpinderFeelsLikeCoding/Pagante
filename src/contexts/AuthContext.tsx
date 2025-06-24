@@ -164,115 +164,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Fetching profile for user:', user.id)
       console.log('User email:', user.email)
       
-      // First, let's try a direct query with better error handling
-      const { data, error, count } = await supabase
+      // Try multiple approaches to get the profile
+      
+      // Approach 1: Simple select with single()
+      console.log('Trying approach 1: simple select...')
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact' })
+        .select('*')
         .eq('id', user.id)
-
-      console.log('Profile query result:', { data, error, count })
-
-      if (error) {
-        console.error('Error fetching profile:', error)
-        console.error('Error details:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        })
-        
-        // If it's an RLS error or permission error, try creating profile
-        if (error.code === 'PGRST301' || error.message.includes('permission') || error.message.includes('policy')) {
-          console.log('Looks like an RLS/permission issue, trying to create profile...')
-          await createProfileForUser(user)
-          return
-        }
-        
-        throw error
-      }
-
-      if (data && data.length > 0) {
-        console.log('Profile found:', data[0].username)
-        setProfile(data[0])
-      } else {
-        console.log('No profile found for user (count:', count, '), creating one...')
-        await createProfileForUser(user)
-      }
-    } catch (error) {
-      console.error('Unexpected error fetching profile:', error)
-      // Try to create profile as fallback
-      await createProfileForUser(user)
-    }
-  }
-
-  const createProfileForUser = async (user: User) => {
-    try {
-      console.log('Creating profile for existing user:', user.id)
-      
-      // Generate a username from email
-      const username = user.email?.split('@')[0] || `user_${user.id.slice(0, 8)}`
-      
-      const profileData = {
-        id: user.id,
-        email: user.email!,
-        username: username,
-        full_name: username, // Use username as full_name for now
-        role: 'user' as const,
-      }
-
-      console.log('Attempting to insert profile:', profileData)
-
-      const { data: insertData, error: profileError } = await supabase
-        .from('profiles')
-        .insert([profileData])
-        .select()
         .single()
 
-      if (profileError) {
-        console.error('Profile creation error:', profileError)
-        console.error('Profile creation error details:', {
-          code: profileError.code,
-          message: profileError.message,
-          details: profileError.details,
-          hint: profileError.hint
-        })
-        
-        if (profileError.code === '23505') {
-          // Unique constraint violation - try with a random suffix
-          const randomSuffix = Math.random().toString(36).substring(2, 8)
-          const uniqueUsername = `${username}_${randomSuffix}`
-          
-          console.log('Username conflict, trying with unique username:', uniqueUsername)
-          
-          const { data: retryData, error: retryError } = await supabase
-            .from('profiles')
-            .insert([
-              {
-                ...profileData,
-                username: uniqueUsername,
-                full_name: uniqueUsername,
-              },
-            ])
-            .select()
-            .single()
-
-          if (retryError) {
-            console.error('Retry profile creation error:', retryError)
-            throw retryError
-          }
-          
-          console.log('Profile created with unique username:', uniqueUsername)
-          setProfile(retryData)
-        } else {
-          throw profileError
-        }
-      } else {
-        console.log('Profile created successfully:', username)
-        setProfile(insertData)
+      if (profileData && !profileError) {
+        console.log('Profile found with approach 1:', profileData.username)
+        setProfile(profileData)
+        return
       }
+
+      console.log('Approach 1 failed:', profileError)
+
+      // Approach 2: Select with maybeSingle()
+      console.log('Trying approach 2: maybeSingle...')
+      const { data: maybeData, error: maybeError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (maybeData && !maybeError) {
+        console.log('Profile found with approach 2:', maybeData.username)
+        setProfile(maybeData)
+        return
+      }
+
+      console.log('Approach 2 failed:', maybeError)
+
+      // Approach 3: Select all and filter
+      console.log('Trying approach 3: select all and filter...')
+      const { data: allData, error: allError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+
+      if (allData && allData.length > 0 && !allError) {
+        console.log('Profile found with approach 3:', allData[0].username)
+        setProfile(allData[0])
+        return
+      }
+
+      console.log('Approach 3 failed:', allError)
+
+      // If all approaches fail, the profile doesn't exist or RLS is blocking
+      console.log('No profile found with any approach, user needs to complete registration')
+      
+      // For existing users who are signing in, we should redirect them to complete their profile
+      // rather than trying to create it automatically
+      setProfile(null)
+      
     } catch (error) {
-      console.error('Failed to create profile for user:', error)
-      // Set profile to null so user can still access the app
+      console.error('Unexpected error fetching profile:', error)
       setProfile(null)
     }
   }
