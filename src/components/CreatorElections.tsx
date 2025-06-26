@@ -61,27 +61,27 @@ export function CreatorElections() {
   const totalVotes = candidates.reduce((sum, candidate) => sum + candidate.votes, 0)
 
   return (
-    <div className="py-16 bg-gradient-to-br from-royal-50 to-yellow-50">
+    <div className="py-16 bg-gradient-to-br from-royal-900 via-navy-800 to-royal-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <Vote className="w-12 h-12 text-royal-600" />
+            <Vote className="w-12 h-12 text-yellow-400" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+          <h2 className="text-3xl font-bold text-yellow-400 sm:text-4xl">
             Creator Congressional Elections
           </h2>
-          <p className="mt-4 text-xl text-gray-600">
+          <p className="mt-4 text-xl text-yellow-200">
             Vote for creators who will represent your interests in platform governance
           </p>
-          <div className="mt-6 bg-white rounded-lg p-4 inline-block shadow-md">
-            <div className="flex items-center space-x-4 text-sm">
+          <div className="mt-6 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg p-4 inline-block shadow-2xl">
+            <div className="flex items-center space-x-4 text-sm text-navy-900">
               <div className="flex items-center space-x-2">
-                <Calendar className="w-4 h-4 text-gray-500" />
-                <span>Election Period: Dec 1-15, 2024</span>
+                <Calendar className="w-4 h-4" />
+                <span className="font-semibold">Election Period: Dec 1-15, 2024</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Users className="w-4 h-4 text-gray-500" />
-                <span>{totalVotes.toLocaleString()} votes cast</span>
+                <Users className="w-4 h-4" />
+                <span className="font-semibold">{totalVotes.toLocaleString()} votes cast</span>
               </div>
             </div>
           </div>
@@ -95,8 +95,8 @@ export function CreatorElections() {
             return (
               <div
                 key={candidate.id}
-                className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group ${
-                  isSelected ? 'ring-4 ring-royal-500' : ''
+                className={`bg-gradient-to-br from-yellow-100 to-royal-100 rounded-xl shadow-2xl hover:shadow-3xl transition-all duration-300 overflow-hidden cursor-pointer group transform hover:scale-105 ${
+                  isSelected ? 'ring-4 ring-yellow-400 shadow-yellow-400/50' : ''
                 }`}
                 onClick={() => setSelectedCandidate(candidate.id)}
               >
@@ -106,7 +106,7 @@ export function CreatorElections() {
                       <img
                         src={candidate.avatar}
                         alt={candidate.name}
-                        className="w-16 h-16 rounded-full object-cover"
+                        className="w-16 h-16 rounded-full object-cover shadow-lg"
                       />
                       {index < 3 && (
                         <div className="absolute -top-1 -right-1">
@@ -118,19 +118,19 @@ export function CreatorElections() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-xl font-bold text-gray-900">
+                          <h3 className="text-xl font-bold text-navy-900">
                             {candidate.name}
                           </h3>
                           <p className="text-royal-600 font-medium">
                             {candidate.username}
                           </p>
                           <div className="flex items-center space-x-2 mt-1">
-                            <span className="bg-royal-100 text-royal-800 text-xs px-2 py-1 rounded-full">
+                            <span className="bg-royal-200 text-royal-800 text-xs px-2 py-1 rounded-full">
                               {candidate.category}
                             </span>
                             <div className="flex items-center space-x-1">
                               <Star className="w-4 h-4 text-yellow-500" />
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-navy-600">
                                 {candidate.supporters.toLocaleString()} supporters
                               </span>
                             </div>
@@ -138,10 +138,10 @@ export function CreatorElections() {
                         </div>
                         
                         <div className="text-right">
-                          <div className="text-2xl font-bold text-gray-900">
+                          <div className="text-2xl font-bold text-navy-900">
                             {candidate.votes.toLocaleString()}
                           </div>
-                          <div className="text-sm text-gray-600">votes</div>
+                          <div className="text-sm text-navy-600">votes</div>
                           <div className="text-sm text-royal-600 font-medium">
                             {votePercentage.toFixed(1)}%
                           </div>
@@ -149,15 +149,15 @@ export function CreatorElections() {
                       </div>
                       
                       <div className="mt-4">
-                        <p className="text-gray-700 text-sm leading-relaxed">
+                        <p className="text-navy-700 text-sm leading-relaxed">
                           {candidate.platform}
                         </p>
                       </div>
                       
                       <div className="mt-4">
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="w-full bg-navy-200 rounded-full h-3 shadow-inner">
                           <div 
-                            className="bg-gradient-to-r from-royal-500 to-yellow-500 h-2 rounded-full transition-all duration-300"
+                            className="bg-gradient-to-r from-yellow-500 to-royal-500 h-3 rounded-full transition-all duration-500 shadow-lg"
                             style={{ width: `${votePercentage}%` }}
                           />
                         </div>
@@ -166,12 +166,12 @@ export function CreatorElections() {
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 px-6 py-3">
+                <div className="bg-gradient-to-r from-yellow-200 to-royal-200 px-6 py-3">
                   <button
-                    className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
+                    className={`w-full py-2 px-4 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 ${
                       isSelected
-                        ? 'bg-royal-600 text-white'
-                        : 'bg-white text-royal-600 border border-royal-600 hover:bg-royal-50'
+                        ? 'bg-gradient-to-r from-royal-600 to-royal-700 text-white shadow-lg'
+                        : 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-navy-900 hover:from-yellow-600 hover:to-yellow-700 shadow-lg'
                     }`}
                   >
                     {isSelected ? 'Selected' : 'Vote for ' + candidate.name}
@@ -183,10 +183,10 @@ export function CreatorElections() {
         </div>
 
         <div className="mt-12 text-center">
-          <button className="bg-gradient-to-r from-royal-600 to-yellow-600 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:from-royal-700 hover:to-yellow-700 transition-all duration-300 shadow-lg transform hover:scale-105">
+          <button className="bg-gradient-to-r from-yellow-500 to-royal-500 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-yellow-600 hover:to-royal-600 transition-all duration-300 shadow-2xl transform hover:scale-105">
             Cast Your Vote
           </button>
-          <p className="mt-4 text-gray-600 text-sm">
+          <p className="mt-4 text-yellow-200 text-sm">
             Your vote helps shape the future of creator representation on the platform
           </p>
         </div>

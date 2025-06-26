@@ -68,10 +68,10 @@ export function ContentFeed({ creatorId, limit = 20, showScheduled = false }: Co
 
   const getTierBadge = (tier: string) => {
     const badges = {
-      free: { label: 'Free', color: 'bg-green-100 text-green-800' },
-      supporter: { label: 'Supporter', color: 'bg-blue-100 text-blue-800' },
-      premium: { label: 'Premium', color: 'bg-purple-100 text-purple-800' },
-      vip: { label: 'VIP', color: 'bg-gold-100 text-gold-800' },
+      free: { label: 'Free', color: 'bg-green-200 text-green-800' },
+      supporter: { label: 'Supporter', color: 'bg-blue-200 text-blue-800' },
+      premium: { label: 'Premium', color: 'bg-purple-200 text-purple-800' },
+      vip: { label: 'VIP', color: 'bg-gold-200 text-gold-800' },
     }
     return badges[tier as keyof typeof badges] || badges.free
   }
@@ -112,10 +112,10 @@ export function ContentFeed({ creatorId, limit = 20, showScheduled = false }: Co
     return (
       <div className="space-y-6">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="bg-white rounded-xl shadow-lg p-6 animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-            <div className="h-32 bg-gray-200 rounded mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          <div key={i} className="bg-gradient-to-br from-yellow-100 to-royal-100 rounded-xl shadow-lg p-6 animate-pulse">
+            <div className="h-4 bg-yellow-200 rounded w-3/4 mb-4"></div>
+            <div className="h-32 bg-yellow-200 rounded mb-4"></div>
+            <div className="h-4 bg-yellow-200 rounded w-1/2"></div>
           </div>
         ))}
       </div>
@@ -125,11 +125,11 @@ export function ContentFeed({ creatorId, limit = 20, showScheduled = false }: Co
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="text-red-500 text-lg mb-2">Error loading content</div>
-        <div className="text-gray-400 mb-4">{error}</div>
+        <div className="text-red-400 text-lg mb-2">Error loading content</div>
+        <div className="text-yellow-200 mb-4">{error}</div>
         <button
           onClick={loadContent}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          className="bg-gradient-to-r from-yellow-500 to-royal-500 text-white px-4 py-2 rounded-lg hover:from-yellow-600 hover:to-royal-600 transition-colors shadow-lg"
         >
           Try Again
         </button>
@@ -140,8 +140,8 @@ export function ContentFeed({ creatorId, limit = 20, showScheduled = false }: Co
   if (content.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-500 text-lg mb-2">No content available</div>
-        <div className="text-gray-400">
+        <div className="text-yellow-400 text-lg mb-2">No content available</div>
+        <div className="text-yellow-200">
           {creatorId ? 'This creator hasn\'t posted any content yet.' : 'Check back later for new posts!'}
         </div>
       </div>
@@ -159,19 +159,19 @@ export function ContentFeed({ creatorId, limit = 20, showScheduled = false }: Co
         return (
           <article 
             key={post.id} 
-            className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 border ${
-              scheduled ? 'border-orange-200 bg-orange-50' : 'border-gray-200'
+            className={`bg-gradient-to-br from-yellow-100 to-royal-100 rounded-xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-300 border-2 transform hover:scale-105 ${
+              scheduled ? 'border-orange-300 bg-gradient-to-br from-orange-100 to-yellow-100' : 'border-yellow-200'
             }`}
           >
             {/* Scheduled Post Banner */}
             {scheduled && scheduledTime && (
-              <div className="bg-orange-100 border-b border-orange-200 px-6 py-3">
-                <div className="flex items-center space-x-2 text-orange-800">
+              <div className="bg-gradient-to-r from-orange-500 to-orange-600 border-b border-orange-300 px-6 py-3">
+                <div className="flex items-center space-x-2 text-white">
                   <Calendar className="w-4 h-4" />
                   <span className="text-sm font-medium">
                     Scheduled to publish {scheduledTime.relative}
                   </span>
-                  <span className="text-xs text-orange-600">
+                  <span className="text-xs text-orange-100">
                     ({scheduledTime.absolute})
                   </span>
                 </div>
@@ -183,7 +183,7 @@ export function ContentFeed({ creatorId, limit = 20, showScheduled = false }: Co
                 <div className="flex items-center space-x-3">
                   <div className="text-2xl">{contentIcon}</div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">{post.title}</h3>
+                    <h3 className="text-xl font-bold text-navy-900">{post.title}</h3>
                     <div className="flex items-center space-x-2 mt-1">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${tierBadge.color}`}>
                         {post.tier_required === 'free' ? (
@@ -195,7 +195,7 @@ export function ContentFeed({ creatorId, limit = 20, showScheduled = false }: Co
                           </>
                         )}
                       </span>
-                      <span className="text-gray-500 text-sm">
+                      <span className="text-navy-500 text-sm">
                         {scheduled ? 'Draft' : format(new Date(post.created_at), 'MMM d, yyyy')}
                       </span>
                       {scheduled && (
@@ -208,14 +208,14 @@ export function ContentFeed({ creatorId, limit = 20, showScheduled = false }: Co
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-2 text-gray-500 text-sm">
+                <div className="flex items-center space-x-2 text-navy-500 text-sm">
                   <Eye className="w-4 h-4" />
                   <span>{post.view_count}</span>
                 </div>
               </div>
 
               {post.description && (
-                <p className="text-gray-600 mb-4">{post.description}</p>
+                <p className="text-navy-600 mb-4">{post.description}</p>
               )}
 
               {/* Only show content if published or if we're showing scheduled content */}
@@ -225,9 +225,9 @@ export function ContentFeed({ creatorId, limit = 20, showScheduled = false }: Co
 
               {/* Show preview message for scheduled content */}
               {scheduled && !showScheduled && (
-                <div className="bg-gray-100 rounded-lg p-4 text-center">
-                  <AlertCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <div className="text-gray-600">
+                <div className="bg-yellow-200 rounded-lg p-4 text-center">
+                  <AlertCircle className="w-8 h-8 text-orange-600 mx-auto mb-2" />
+                  <div className="text-navy-600">
                     This content is scheduled and will be published {scheduledTime?.relative}
                   </div>
                 </div>
@@ -238,7 +238,7 @@ export function ContentFeed({ creatorId, limit = 20, showScheduled = false }: Co
                   {post.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium hover:bg-blue-100 transition-colors cursor-pointer"
+                      className="bg-royal-200 text-royal-700 px-3 py-1 rounded-full text-sm font-medium hover:bg-royal-300 transition-colors cursor-pointer"
                     >
                       #{tag}
                     </span>
@@ -246,19 +246,19 @@ export function ContentFeed({ creatorId, limit = 20, showScheduled = false }: Co
                 </div>
               )}
 
-              <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-yellow-200">
                 <div className="flex items-center space-x-6">
-                  <button className="flex items-center space-x-2 text-gray-600 hover:text-red-500 transition-colors group">
+                  <button className="flex items-center space-x-2 text-navy-600 hover:text-red-500 transition-colors group">
                     <Heart className="w-5 h-5 group-hover:scale-110 transition-transform" />
                     <span>{post.like_count}</span>
                   </button>
                   
-                  <button className="flex items-center space-x-2 text-gray-600 hover:text-blue-500 transition-colors group">
+                  <button className="flex items-center space-x-2 text-navy-600 hover:text-blue-500 transition-colors group">
                     <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
                     <span>{post.comment_count}</span>
                   </button>
                   
-                  <button className="flex items-center space-x-2 text-gray-600 hover:text-green-500 transition-colors group">
+                  <button className="flex items-center space-x-2 text-navy-600 hover:text-green-500 transition-colors group">
                     <Share2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
                     <span>Share</span>
                   </button>
