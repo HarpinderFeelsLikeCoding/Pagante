@@ -1,5 +1,5 @@
 import React from 'react'
-import { Shield, Users, Scale, Crown, User, BarChart, LogOut, Compass } from 'lucide-react'
+import { Shield, Users, Scale, Crown, User, BarChart, LogOut, Compass, Database } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -73,6 +73,18 @@ export function Header() {
                   <BarChart className="w-5 h-5" />
                   <span className="hidden sm:inline">Dashboard</span>
                 </Link>
+                
+                {/* Admin Demo Data Link */}
+                {profile.role === 'admin' && (
+                  <Link
+                    to="/demo-data"
+                    className="flex items-center space-x-2 hover:text-gold-300 transition-colors"
+                  >
+                    <Database className="w-5 h-5" />
+                    <span className="hidden sm:inline">Demo Data</span>
+                  </Link>
+                )}
+                
                 <div className="flex items-center space-x-2">
                   {getBranchIcon(profile.role)}
                   <span className="text-sm font-medium">{profile.username}</span>

@@ -10,6 +10,7 @@ import { Governance } from './pages/Governance'
 import { CreatorDashboard } from './pages/CreatorDashboard'
 import { CreatorProfile } from './pages/CreatorProfile'
 import { Discover } from './pages/Discover'
+import { DemoData } from './pages/DemoData'
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
               <Route path="/governance" element={<Governance />} />
               <Route path="/dashboard" element={<CreatorDashboard />} />
               <Route path="/creator/:username" element={<CreatorProfile />} />
+              <Route path="/demo-data" element={<DemoData />} />
               {/* Catch-all route for unmatched paths - redirect to home */}
               <Route path="*" element={<div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
