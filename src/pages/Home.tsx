@@ -50,7 +50,7 @@ export function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-gradient-to-br from-yellow-50 to-royal-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => {
@@ -58,14 +58,14 @@ export function Home() {
               return (
                 <div key={index} className="text-center group hover:transform hover:scale-105 transition-all duration-300">
                   <div className="flex justify-center mb-4">
-                    <div className="p-3 bg-yellow-100 rounded-full group-hover:bg-yellow-200 transition-colors">
-                      <IconComponent className="w-8 h-8 text-yellow-600" />
+                    <div className="p-3 bg-yellow-200 rounded-full group-hover:bg-yellow-300 transition-colors">
+                      <IconComponent className="w-8 h-8 text-royal-700" />
                     </div>
                   </div>
-                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                  <div className="text-3xl font-bold text-navy-900 mb-2">
                     {stat.value}
                   </div>
-                  <div className="text-gray-600">
+                  <div className="text-navy-600">
                     {stat.label}
                   </div>
                 </div>
@@ -76,13 +76,13 @@ export function Home() {
       </section>
 
       {/* How It Works */}
-      <section className="py-16 bg-gradient-to-r from-yellow-50 to-royal-50">
+      <section className="py-16 bg-gradient-to-r from-yellow-100 to-royal-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+            <h2 className="text-3xl font-bold text-navy-900 sm:text-4xl">
               How Pagante Works
             </h2>
-            <p className="mt-4 text-xl text-gray-600">
+            <p className="mt-4 text-xl text-navy-700">
               A revolutionary approach to creator platform governance
             </p>
           </div>
@@ -94,10 +94,10 @@ export function Home() {
                   1
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
+              <h3 className="text-xl font-bold text-navy-900 mb-4">
                 Create & Build Your Audience
               </h3>
-              <p className="text-gray-600">
+              <p className="text-navy-700">
                 Start creating content, build your community, and establish your presence on the platform.
               </p>
             </div>
@@ -108,10 +108,10 @@ export function Home() {
                   2
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
+              <h3 className="text-xl font-bold text-navy-900 mb-4">
                 Vote for Creator Representatives
               </h3>
-              <p className="text-gray-600">
+              <p className="text-navy-700">
                 Participate in democratic elections to choose creators who will represent your interests in platform governance.
               </p>
             </div>
@@ -122,10 +122,10 @@ export function Home() {
                   3
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
+              <h3 className="text-xl font-bold text-navy-900 mb-4">
                 Shape Platform Policies
               </h3>
-              <p className="text-gray-600">
+              <p className="text-navy-700">
                 Your elected representatives propose and vote on policies that affect revenue sharing, creator rights, and platform features.
               </p>
             </div>

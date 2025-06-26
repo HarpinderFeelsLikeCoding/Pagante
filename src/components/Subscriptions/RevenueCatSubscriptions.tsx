@@ -123,20 +123,20 @@ export function RevenueCatSubscriptions({ creatorId, creatorName }: RevenueCatSu
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-8">
+      <div className="bg-gradient-to-br from-yellow-50 to-royal-50 rounded-xl shadow-lg p-8">
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
+          <div className="h-6 bg-yellow-200 rounded w-1/3 mb-6"></div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="border border-gray-200 rounded-lg p-6">
-                <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-                <div className="h-12 bg-gray-200 rounded w-1/2 mb-4"></div>
+              <div key={i} className="border border-yellow-200 rounded-lg p-6">
+                <div className="h-8 bg-yellow-200 rounded w-3/4 mb-4"></div>
+                <div className="h-12 bg-yellow-200 rounded w-1/2 mb-4"></div>
                 <div className="space-y-2 mb-6">
                   {[...Array(3)].map((_, j) => (
-                    <div key={j} className="h-4 bg-gray-200 rounded"></div>
+                    <div key={j} className="h-4 bg-yellow-200 rounded"></div>
                   ))}
                 </div>
-                <div className="h-10 bg-gray-200 rounded"></div>
+                <div className="h-10 bg-yellow-200 rounded"></div>
               </div>
             ))}
           </div>
@@ -146,12 +146,12 @@ export function RevenueCatSubscriptions({ creatorId, creatorName }: RevenueCatSu
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-8">
+    <div className="bg-gradient-to-br from-yellow-50 to-royal-50 rounded-xl shadow-lg p-8">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+        <h2 className="text-3xl font-bold text-navy-900 mb-4">
           Support {creatorName}
         </h2>
-        <p className="text-xl text-gray-600">
+        <p className="text-xl text-navy-700">
           Choose your level of support and unlock exclusive content
         </p>
       </div>
@@ -173,19 +173,19 @@ export function RevenueCatSubscriptions({ creatorId, creatorName }: RevenueCatSu
 
       {/* Free Tier */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-gray-200">
+        <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-xl shadow-lg p-6 border-2 border-yellow-300">
           <div className="text-center">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Crown className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 bg-yellow-300 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Crown className="w-6 h-6 text-yellow-700" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Free</h3>
-            <div className="text-3xl font-bold text-gray-900 mb-4">$0</div>
-            <ul className="space-y-2 text-sm text-gray-600 mb-6">
+            <h3 className="text-xl font-bold text-navy-900 mb-2">Free</h3>
+            <div className="text-3xl font-bold text-navy-900 mb-4">$0</div>
+            <ul className="space-y-2 text-sm text-navy-700 mb-6">
               <li>• Access to free content</li>
               <li>• Community participation</li>
               <li>• Basic interaction</li>
             </ul>
-            <button className="w-full bg-green-100 text-green-800 py-2 rounded-lg font-medium">
+            <button className="w-full bg-yellow-300 text-navy-800 py-2 rounded-lg font-medium hover:bg-yellow-400 transition-colors">
               Free Access
             </button>
           </div>
@@ -199,7 +199,7 @@ export function RevenueCatSubscriptions({ creatorId, creatorName }: RevenueCatSu
           const isPurchasing = purchasing === product.identifier
           
           return (
-            <div key={product.identifier} className={`bg-white rounded-xl shadow-lg p-6 border-2 ${colors.border} relative`}>
+            <div key={product.identifier} className={`bg-gradient-to-br from-yellow-50 to-royal-50 rounded-xl shadow-lg p-6 border-2 ${colors.border} relative`}>
               {subscribed && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <div className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
@@ -213,15 +213,15 @@ export function RevenueCatSubscriptions({ creatorId, creatorName }: RevenueCatSu
                 <div className={`w-12 h-12 ${colors.light} rounded-full flex items-center justify-center mx-auto mb-4`}>
                   <div className={colors.text}>{icon}</div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{product.title}</h3>
-                <div className="text-3xl font-bold text-gray-900 mb-1">
+                <h3 className="text-xl font-bold text-navy-900 mb-2">{product.title}</h3>
+                <div className="text-3xl font-bold text-navy-900 mb-1">
                   {subscriptionUtils.formatPrice(product.price)}
-                  <span className="text-sm font-normal text-gray-600">/{product.duration}</span>
+                  <span className="text-sm font-normal text-navy-600">/{product.duration}</span>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">{product.description}</p>
+                <p className="text-sm text-navy-600 mb-4">{product.description}</p>
                 
                 {/* Mock benefits based on tier */}
-                <ul className="space-y-2 text-sm text-gray-600 mb-6 text-left">
+                <ul className="space-y-2 text-sm text-navy-600 mb-6 text-left">
                   {product.identifier.includes('supporter') && (
                     <>
                       <li>• Early access to content</li>
@@ -256,9 +256,9 @@ export function RevenueCatSubscriptions({ creatorId, creatorName }: RevenueCatSu
                   disabled={isPurchasing || subscribed}
                   className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center space-x-2 ${
                     subscribed
-                      ? 'bg-green-100 text-green-800 cursor-not-allowed'
+                      ? 'bg-green-200 text-green-800 cursor-not-allowed'
                       : isPurchasing
-                      ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                      ? 'bg-yellow-200 text-navy-500 cursor-not-allowed'
                       : `bg-gradient-to-r ${colors.bg} text-white hover:opacity-90`
                   }`}
                 >
@@ -287,18 +287,18 @@ export function RevenueCatSubscriptions({ creatorId, creatorName }: RevenueCatSu
 
       {/* Current Subscription Status */}
       {customerInfo && customerInfo.activeSubscriptions.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-          <h4 className="font-semibold text-yellow-900 mb-3">Your Active Subscriptions</h4>
+        <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-6">
+          <h4 className="font-semibold text-navy-900 mb-3">Your Active Subscriptions</h4>
           <div className="space-y-2">
             {customerInfo.activeSubscriptions.map((subscription) => {
               const product = products.find(p => p.identifier === subscription)
               return (
-                <div key={subscription} className="flex items-center justify-between bg-white rounded-lg p-3">
+                <div key={subscription} className="flex items-center justify-between bg-yellow-50 rounded-lg p-3">
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="w-5 h-5 text-green-500" />
-                    <span className="font-medium">{product?.title || subscription}</span>
+                    <span className="font-medium text-navy-900">{product?.title || subscription}</span>
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-navy-600">
                     {customerInfo.latestExpirationDate && (
                       <>
                         Expires in {subscriptionUtils.getDaysUntilExpiration(customerInfo.latestExpirationDate)} days
@@ -313,7 +313,7 @@ export function RevenueCatSubscriptions({ creatorId, creatorName }: RevenueCatSu
       )}
 
       {/* RevenueCat Info */}
-      <div className="mt-8 text-center text-sm text-gray-500">
+      <div className="mt-8 text-center text-sm text-navy-500">
         <p>Secure payments powered by RevenueCat</p>
         <p>Cancel anytime • No hidden fees • 30-day money-back guarantee</p>
       </div>
