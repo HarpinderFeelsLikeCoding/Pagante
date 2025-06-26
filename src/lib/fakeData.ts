@@ -1,12 +1,13 @@
 import { supabase } from './supabase'
 
-// Fake data for presentation purposes
+// Enhanced fake data for presentation purposes
 export const createFakeData = async () => {
-  console.log('Creating fake data for presentation...')
+  console.log('Creating comprehensive fake data for presentation...')
 
   try {
-    // 1. Create fake users/profiles
+    // 1. Create extensive fake users/profiles for creators page
     const fakeProfiles = [
+      // Elected Representatives
       {
         id: '11111111-1111-1111-1111-111111111111',
         email: 'sarah.chen@example.com',
@@ -14,14 +15,6 @@ export const createFakeData = async () => {
         full_name: 'Sarah Chen',
         role: 'elected_creator',
         avatar_url: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400'
-      },
-      {
-        id: '22222222-2222-2222-2222-222222222222',
-        email: 'marcus.williams@example.com',
-        username: 'techmarco',
-        full_name: 'Marcus Williams',
-        role: 'creator',
-        avatar_url: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=400'
       },
       {
         id: '33333333-3333-3333-3333-333333333333',
@@ -32,6 +25,31 @@ export const createFakeData = async () => {
         avatar_url: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400'
       },
       {
+        id: '77777777-7777-7777-7777-777777777777',
+        email: 'alex.kim@example.com',
+        username: 'alexcodes',
+        full_name: 'Alex Kim',
+        role: 'elected_creator',
+        avatar_url: 'https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=400'
+      },
+      {
+        id: '88888888-8888-8888-8888-888888888888',
+        email: 'maya.patel@example.com',
+        username: 'mayaart',
+        full_name: 'Maya Patel',
+        role: 'elected_creator',
+        avatar_url: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=400'
+      },
+      // Regular Creators
+      {
+        id: '22222222-2222-2222-2222-222222222222',
+        email: 'marcus.williams@example.com',
+        username: 'techmarco',
+        full_name: 'Marcus Williams',
+        role: 'creator',
+        avatar_url: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=400'
+      },
+      {
         id: '44444444-4444-4444-4444-444444444444',
         email: 'david.park@example.com',
         username: 'davidwrites',
@@ -40,6 +58,55 @@ export const createFakeData = async () => {
         avatar_url: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=400'
       },
       {
+        id: '99999999-9999-9999-9999-999999999999',
+        email: 'emma.johnson@example.com',
+        username: 'emmacooks',
+        full_name: 'Emma Johnson',
+        role: 'creator',
+        avatar_url: 'https://images.pexels.com/photos/1181424/pexels-photo-1181424.jpeg?auto=compress&cs=tinysrgb&w=400'
+      },
+      {
+        id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        email: 'james.wilson@example.com',
+        username: 'jamesfitness',
+        full_name: 'James Wilson',
+        role: 'creator',
+        avatar_url: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=400'
+      },
+      {
+        id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+        email: 'sophia.garcia@example.com',
+        username: 'sophiaphoto',
+        full_name: 'Sophia Garcia',
+        role: 'creator',
+        avatar_url: 'https://images.pexels.com/photos/1181519/pexels-photo-1181519.jpeg?auto=compress&cs=tinysrgb&w=400'
+      },
+      {
+        id: 'cccccccc-cccc-cccc-cccc-cccccccccccc',
+        email: 'ryan.thompson@example.com',
+        username: 'ryangaming',
+        full_name: 'Ryan Thompson',
+        role: 'creator',
+        avatar_url: 'https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=400'
+      },
+      {
+        id: 'dddddddd-dddd-dddd-dddd-dddddddddddd',
+        email: 'olivia.brown@example.com',
+        username: 'oliviabeauty',
+        full_name: 'Olivia Brown',
+        role: 'creator',
+        avatar_url: 'https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg?auto=compress&cs=tinysrgb&w=400'
+      },
+      {
+        id: 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
+        email: 'noah.davis@example.com',
+        username: 'noahtravel',
+        full_name: 'Noah Davis',
+        role: 'creator',
+        avatar_url: 'https://images.pexels.com/photos/1040882/pexels-photo-1040882.jpeg?auto=compress&cs=tinysrgb&w=400'
+      },
+      // Judicial Branch
+      {
         id: '55555555-5555-5555-5555-555555555555',
         email: 'judge.smith@example.com',
         username: 'judgesmithlaw',
@@ -47,6 +114,23 @@ export const createFakeData = async () => {
         role: 'judge',
         avatar_url: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=400'
       },
+      {
+        id: 'ffffffff-ffff-ffff-ffff-ffffffffffff',
+        email: 'judge.martinez@example.com',
+        username: 'judgemartinez',
+        full_name: 'Judge Carlos Martinez',
+        role: 'judge',
+        avatar_url: 'https://images.pexels.com/photos/1040883/pexels-photo-1040883.jpeg?auto=compress&cs=tinysrgb&w=400'
+      },
+      {
+        id: 'gggggggg-gggg-gggg-gggg-gggggggggggg',
+        email: 'judge.lee@example.com',
+        username: 'judgelee',
+        full_name: 'Judge Jennifer Lee',
+        role: 'judge',
+        avatar_url: 'https://images.pexels.com/photos/1181691/pexels-photo-1181691.jpeg?auto=compress&cs=tinysrgb&w=400'
+      },
+      // Platform Admin
       {
         id: '66666666-6666-6666-6666-666666666666',
         email: 'admin@pagante.com',
@@ -68,39 +152,101 @@ export const createFakeData = async () => {
       }
     }
 
-    // 2. Create creators
+    // 2. Create comprehensive creators data
     const fakeCreators = [
+      // Elected Representatives
       {
         id: 'creator-1111-1111-1111-111111111111',
         user_id: '11111111-1111-1111-1111-111111111111',
-        description: 'Digital artist and UI/UX designer passionate about creating beautiful, accessible designs. Advocate for creator mental health and fair revenue sharing.',
+        description: 'Digital artist and UI/UX designer passionate about creating beautiful, accessible designs. Advocate for creator mental health and fair revenue sharing. Leading the charge for better platform policies.',
         is_elected: true,
-        election_votes: 1247,
+        election_votes: 2847,
         term_start_date: '2024-01-01T00:00:00Z',
         term_end_date: '2024-12-31T23:59:59Z'
-      },
-      {
-        id: 'creator-2222-2222-2222-222222222222',
-        user_id: '22222222-2222-2222-2222-222222222222',
-        description: 'Tech educator and software developer. Creating tutorials, courses, and tools to help others learn programming and technology.',
-        is_elected: false,
-        election_votes: 1156
       },
       {
         id: 'creator-3333-3333-3333-333333333333',
         user_id: '33333333-3333-3333-3333-333333333333',
-        description: 'Independent musician and audio producer. Champion for musicians\' rights and fair compensation in the digital age.',
+        description: 'Independent musician and audio producer. Champion for musicians\' rights and fair compensation in the digital age. Fighting for better revenue sharing for audio creators.',
         is_elected: true,
-        election_votes: 1089,
+        election_votes: 2456,
         term_start_date: '2024-01-01T00:00:00Z',
         term_end_date: '2024-12-31T23:59:59Z'
       },
       {
+        id: 'creator-7777-7777-7777-777777777777',
+        user_id: '77777777-7777-7777-7777-777777777777',
+        description: 'Full-stack developer and coding instructor. Passionate about making technology education accessible to everyone. Advocating for better creator tools and platform transparency.',
+        is_elected: true,
+        election_votes: 2234,
+        term_start_date: '2024-01-01T00:00:00Z',
+        term_end_date: '2024-12-31T23:59:59Z'
+      },
+      {
+        id: 'creator-8888-8888-8888-888888888888',
+        user_id: '88888888-8888-8888-8888-888888888888',
+        description: 'Contemporary artist and digital illustrator. Creating vibrant artwork that celebrates diversity and inclusion. Leading initiatives for artist rights and fair compensation.',
+        is_elected: true,
+        election_votes: 1987,
+        term_start_date: '2024-01-01T00:00:00Z',
+        term_end_date: '2024-12-31T23:59:59Z'
+      },
+      // Regular Creators
+      {
+        id: 'creator-2222-2222-2222-222222222222',
+        user_id: '22222222-2222-2222-2222-222222222222',
+        description: 'Tech educator and software developer. Creating tutorials, courses, and tools to help others learn programming and technology. Specializing in React, TypeScript, and modern web development.',
+        is_elected: false,
+        election_votes: 1756
+      },
+      {
         id: 'creator-4444-4444-4444-444444444444',
         user_id: '44444444-4444-4444-4444-444444444444',
-        description: 'Writer and educator focused on making complex topics accessible. Promoting educational content and creator learning initiatives.',
+        description: 'Writer and educator focused on making complex topics accessible. Promoting educational content and creator learning initiatives. Specializing in technical writing and communication.',
+        is_elected: false,
+        election_votes: 1432
+      },
+      {
+        id: 'creator-9999-9999-9999-999999999999',
+        user_id: '99999999-9999-9999-9999-999999999999',
+        description: 'Professional chef and culinary instructor. Sharing recipes, cooking techniques, and food culture from around the world. Making gourmet cooking accessible to home cooks.',
+        is_elected: false,
+        election_votes: 1298
+      },
+      {
+        id: 'creator-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        user_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        description: 'Certified personal trainer and nutrition coach. Helping people achieve their fitness goals through sustainable lifestyle changes. Promoting body positivity and mental wellness.',
+        is_elected: false,
+        election_votes: 1156
+      },
+      {
+        id: 'creator-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+        user_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+        description: 'Professional photographer specializing in portrait and landscape photography. Teaching photography techniques and post-processing skills. Advocating for visual artists\' rights.',
+        is_elected: false,
+        election_votes: 1089
+      },
+      {
+        id: 'creator-cccc-cccc-cccc-cccccccccccc',
+        user_id: 'cccccccc-cccc-cccc-cccc-cccccccccccc',
+        description: 'Gaming content creator and esports analyst. Covering the latest games, strategies, and industry news. Building a community of passionate gamers and competitive players.',
         is_elected: false,
         election_votes: 987
+      },
+      {
+        id: 'creator-dddd-dddd-dddd-dddddddddddd',
+        user_id: 'dddddddd-dddd-dddd-dddd-dddddddddddd',
+        description: 'Beauty and skincare expert with 10+ years in the industry. Sharing honest product reviews, tutorials, and self-care tips. Promoting inclusive beauty standards.',
+        is_elected: false,
+        election_votes: 876
+      },
+      {
+        id: 'creator-eeee-eeee-eeee-eeeeeeeeeeee',
+        user_id: 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
+        description: 'Travel blogger and cultural explorer. Documenting adventures around the world and sharing travel tips, cultural insights, and sustainable tourism practices.',
+        is_elected: false,
+        election_votes: 743
       }
     ]
 
@@ -114,7 +260,105 @@ export const createFakeData = async () => {
       }
     }
 
-    // 3. Create subscription tiers
+    // 3. Create comprehensive disputes for disputes page
+    const fakeDisputes = [
+      {
+        id: 'dispute-1',
+        plaintiff_id: '22222222-2222-2222-2222-222222222222', // Marcus
+        defendant_id: '44444444-4444-4444-4444-444444444444', // David
+        title: 'Copyright Infringement - Tutorial Content',
+        description: 'Plaintiff claims defendant used copyrighted code examples and tutorial structure without permission in a published course. Seeking proper attribution and revenue sharing for the original work.',
+        status: 'under_review',
+        assigned_judge_id: '55555555-5555-5555-5555-555555555555', // Judge Smith
+        created_at: '2024-06-18T11:00:00Z'
+      },
+      {
+        id: 'dispute-2',
+        plaintiff_id: '33333333-3333-3333-3333-333333333333', // Luna
+        defendant_id: '22222222-2222-2222-2222-222222222222', // Marcus
+        title: 'Revenue Sharing Dispute - Collaboration Project',
+        description: 'Disagreement over revenue split for a joint educational project combining music production and coding tutorials. Original agreement was 50/50, but plaintiff claims they contributed 70% of the work.',
+        status: 'resolved',
+        assigned_judge_id: '55555555-5555-5555-5555-555555555555', // Judge Smith
+        resolution: 'After reviewing documentation and time logs, revenue split adjusted to 65/35 in favor of plaintiff. Both parties agreed to clearer collaboration agreements for future projects.',
+        created_at: '2024-06-10T15:30:00Z',
+        resolved_at: '2024-06-20T10:15:00Z'
+      },
+      {
+        id: 'dispute-3',
+        plaintiff_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', // Sophia
+        defendant_id: '99999999-9999-9999-9999-999999999999', // Emma
+        title: 'Image Usage Without Permission',
+        description: 'Professional photographer claims food blogger used copyrighted images in recipe posts without licensing or attribution. Seeking compensation and proper licensing agreement.',
+        status: 'open',
+        created_at: '2024-06-22T09:30:00Z'
+      },
+      {
+        id: 'dispute-4',
+        plaintiff_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', // James
+        defendant_id: 'cccccccc-cccc-cccc-cccc-cccccccccccc', // Ryan
+        title: 'Trademark Violation - Brand Name',
+        description: 'Fitness creator claims gaming creator is using a similar brand name that causes confusion among audiences. Seeking cessation of trademark use and potential damages.',
+        status: 'under_review',
+        assigned_judge_id: 'ffffffff-ffff-ffff-ffff-ffffffffffff', // Judge Martinez
+        created_at: '2024-06-19T14:20:00Z'
+      },
+      {
+        id: 'dispute-5',
+        plaintiff_id: 'dddddddd-dddd-dddd-dddd-dddddddddddd', // Olivia
+        defendant_id: 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', // Noah
+        title: 'Sponsored Content Disclosure Violation',
+        description: 'Beauty creator alleges travel blogger failed to properly disclose sponsored content featuring beauty products, violating platform guidelines and potentially affecting brand partnerships.',
+        status: 'resolved',
+        assigned_judge_id: 'gggggggg-gggg-gggg-gggg-gggggggggggg', // Judge Lee
+        resolution: 'Defendant agreed to update all relevant content with proper sponsorship disclosures and attend platform training on advertising guidelines. No financial penalties imposed.',
+        created_at: '2024-06-15T11:45:00Z',
+        resolved_at: '2024-06-21T16:30:00Z'
+      },
+      {
+        id: 'dispute-6',
+        plaintiff_id: '11111111-1111-1111-1111-111111111111', // Sarah
+        defendant_id: '77777777-7777-7777-7777-777777777777', // Alex
+        title: 'Design Template Licensing Dispute',
+        description: 'UI/UX designer claims coding instructor is selling design templates that were originally created under a collaboration agreement with usage restrictions. Seeking clarification of licensing terms.',
+        status: 'under_review',
+        assigned_judge_id: '55555555-5555-5555-5555-555555555555', // Judge Smith
+        created_at: '2024-06-21T13:15:00Z'
+      },
+      {
+        id: 'dispute-7',
+        plaintiff_id: '88888888-8888-8888-8888-888888888888', // Maya
+        defendant_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', // Sophia
+        title: 'Art Style Appropriation Claim',
+        description: 'Digital artist claims photographer is copying distinctive artistic style and color grading techniques without permission, potentially confusing audiences and affecting market position.',
+        status: 'dismissed',
+        assigned_judge_id: 'ffffffff-ffff-ffff-ffff-ffffffffffff', // Judge Martinez
+        resolution: 'Artistic styles and general techniques cannot be copyrighted. No evidence of direct copying of specific works. Case dismissed with recommendation for both parties to develop more distinctive branding.',
+        created_at: '2024-06-12T10:00:00Z',
+        resolved_at: '2024-06-18T14:45:00Z'
+      },
+      {
+        id: 'dispute-8',
+        plaintiff_id: 'cccccccc-cccc-cccc-cccc-cccccccccccc', // Ryan
+        defendant_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', // James
+        title: 'Defamation and False Claims',
+        description: 'Gaming creator alleges fitness creator made false statements about gaming addiction and health impacts in educational content, potentially damaging reputation and subscriber base.',
+        status: 'open',
+        created_at: '2024-06-23T16:20:00Z'
+      }
+    ]
+
+    for (const dispute of fakeDisputes) {
+      const { error } = await supabase
+        .from('disputes')
+        .upsert(dispute, { onConflict: 'id' })
+      
+      if (error) {
+        console.log(`Dispute ${dispute.id} might already exist:`, error.message)
+      }
+    }
+
+    // 4. Create subscription tiers for all creators
     const fakeSubscriptionTiers = [
       // Sarah's tiers
       {
@@ -178,6 +422,39 @@ export const createFakeData = async () => {
         tier_type: 'vip',
         benefits: ['Everything in Music Lover', 'Exclusive unreleased tracks', 'Virtual concert access', 'Signed merchandise'],
         is_active: true
+      },
+      // Alex's tiers
+      {
+        id: 'tier-alex-supporter',
+        creator_id: 'creator-7777-7777-7777-777777777777',
+        name: 'Code Academy',
+        description: 'Learn full-stack development with structured courses',
+        price_monthly: 12.00,
+        tier_type: 'supporter',
+        benefits: ['Access to all courses', 'Code review sessions', 'Career guidance'],
+        is_active: true
+      },
+      // Maya's tiers
+      {
+        id: 'tier-maya-supporter',
+        creator_id: 'creator-8888-8888-8888-888888888888',
+        name: 'Art Patron',
+        description: 'Support contemporary digital art',
+        price_monthly: 15.00,
+        tier_type: 'supporter',
+        benefits: ['High-res artwork downloads', 'Process videos', 'Monthly art prints'],
+        is_active: true
+      },
+      // Emma's tiers
+      {
+        id: 'tier-emma-supporter',
+        creator_id: 'creator-9999-9999-9999-999999999999',
+        name: 'Culinary Student',
+        description: 'Learn professional cooking techniques',
+        price_monthly: 9.00,
+        tier_type: 'supporter',
+        benefits: ['Recipe collections', 'Technique videos', 'Ingredient guides'],
+        is_active: true
       }
     ]
 
@@ -191,7 +468,7 @@ export const createFakeData = async () => {
       }
     }
 
-    // 4. Create diverse content
+    // 5. Create diverse content from multiple creators
     const fakeContent = [
       // Sarah's content
       {
@@ -205,86 +482,11 @@ export const createFakeData = async () => {
         },
         tier_required: 'free',
         is_published: true,
-        view_count: 1247,
-        like_count: 89,
-        comment_count: 23,
+        view_count: 3247,
+        like_count: 189,
+        comment_count: 43,
         tags: ['design', 'ui', 'trends', '2024'],
         created_at: '2024-06-20T10:00:00Z'
-      },
-      {
-        id: 'content-sarah-2',
-        creator_id: 'creator-1111-1111-1111-111111111111',
-        title: 'Design System Masterclass',
-        description: 'Complete guide to building scalable design systems',
-        content_type: 'video',
-        content_data: {
-          video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-          thumbnail_url: 'https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800',
-          duration: 1800
-        },
-        tier_required: 'supporter',
-        is_published: true,
-        view_count: 567,
-        like_count: 45,
-        comment_count: 12,
-        tags: ['design-system', 'tutorial', 'advanced'],
-        created_at: '2024-06-19T14:30:00Z'
-      },
-      {
-        id: 'content-sarah-3',
-        creator_id: 'creator-1111-1111-1111-111111111111',
-        title: 'What\'s your biggest design challenge?',
-        description: 'Let\'s discuss the challenges we face as designers',
-        content_type: 'poll',
-        content_data: {
-          question: 'What\'s your biggest challenge as a designer in 2024?',
-          options: ['Keeping up with trends', 'Client communication', 'Technical constraints', 'Time management', 'Staying creative'],
-          multiple_choice: false
-        },
-        tier_required: 'free',
-        is_published: true,
-        view_count: 892,
-        like_count: 67,
-        comment_count: 34,
-        tags: ['community', 'discussion', 'challenges'],
-        created_at: '2024-06-18T09:15:00Z'
-      },
-      // Marcus's content
-      {
-        id: 'content-marcus-1',
-        creator_id: 'creator-2222-2222-2222-222222222222',
-        title: 'Building Your First React App',
-        description: 'Step-by-step tutorial for React beginners',
-        content_type: 'video',
-        content_data: {
-          video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-          thumbnail_url: 'https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=800',
-          duration: 2400
-        },
-        tier_required: 'free',
-        is_published: true,
-        view_count: 2341,
-        like_count: 156,
-        comment_count: 45,
-        tags: ['react', 'tutorial', 'beginner', 'javascript'],
-        created_at: '2024-06-21T16:00:00Z'
-      },
-      {
-        id: 'content-marcus-2',
-        creator_id: 'creator-2222-2222-2222-222222222222',
-        title: 'Advanced TypeScript Patterns',
-        description: 'Deep dive into advanced TypeScript techniques',
-        content_type: 'article',
-        content_data: {
-          text: 'TypeScript has become essential for modern web development. Here are some advanced patterns that will level up your code:\n\n## 1. Conditional Types\n\nConditional types allow you to create types that depend on a condition:\n\n```typescript\ntype ApiResponse<T> = T extends string ? string : T extends number ? number : never;\n```\n\n## 2. Mapped Types\n\nCreate new types by transforming properties of existing types:\n\n```typescript\ntype Partial<T> = {\n  [P in keyof T]?: T[P];\n};\n```\n\n## 3. Template Literal Types\n\nBuild types using template literal syntax:\n\n```typescript\ntype EventName<T extends string> = `on${Capitalize<T>}`;\n```\n\nThese patterns will help you write more type-safe and maintainable code!'
-        },
-        tier_required: 'supporter',
-        is_published: true,
-        view_count: 1123,
-        like_count: 78,
-        comment_count: 19,
-        tags: ['typescript', 'advanced', 'patterns', 'programming'],
-        created_at: '2024-06-20T11:30:00Z'
       },
       // Luna's content
       {
@@ -301,49 +503,71 @@ export const createFakeData = async () => {
         },
         tier_required: 'supporter',
         is_published: true,
-        view_count: 1876,
-        like_count: 234,
-        comment_count: 67,
+        view_count: 2876,
+        like_count: 334,
+        comment_count: 87,
         tags: ['music', 'single', 'indie', 'original'],
         created_at: '2024-06-22T20:00:00Z'
       },
+      // Alex's content
       {
-        id: 'content-luna-2',
-        creator_id: 'creator-3333-3333-3333-333333333333',
-        title: 'Behind the Music: Studio Session',
-        description: 'Take a look behind the scenes of my recording process',
-        content_type: 'image',
+        id: 'content-alex-1',
+        creator_id: 'creator-7777-7777-7777-777777777777',
+        title: 'Full-Stack Development Roadmap 2024',
+        description: 'Complete guide to becoming a full-stack developer',
+        content_type: 'video',
         content_data: {
-          image_url: 'https://images.pexels.com/photos/164938/pexels-photo-164938.jpeg?auto=compress&cs=tinysrgb&w=800',
-          alt_text: 'Luna in the recording studio with guitar and microphone',
-          file_name: 'studio-session.jpg',
-          file_size: 1048576
+          video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          thumbnail_url: 'https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=800',
+          duration: 3600
         },
         tier_required: 'free',
         is_published: true,
-        view_count: 945,
-        like_count: 123,
-        comment_count: 28,
-        tags: ['behind-the-scenes', 'studio', 'music-production'],
-        created_at: '2024-06-21T15:45:00Z'
+        view_count: 4521,
+        like_count: 267,
+        comment_count: 78,
+        tags: ['programming', 'fullstack', 'career', 'roadmap'],
+        created_at: '2024-06-21T14:00:00Z'
       },
-      // David's content
+      // Maya's content
       {
-        id: 'content-david-1',
-        creator_id: 'creator-4444-4444-4444-444444444444',
-        title: 'The Art of Technical Writing',
-        description: 'How to make complex topics accessible to everyone',
-        content_type: 'article',
+        id: 'content-maya-1',
+        creator_id: 'creator-8888-8888-8888-888888888888',
+        title: 'Digital Art Process: Creating Vibrant Portraits',
+        description: 'Step-by-step process of creating digital portraits with vibrant colors',
+        content_type: 'video',
         content_data: {
-          text: 'Technical writing is both an art and a science. Here\'s how to master it:\n\n## Know Your Audience\n\nBefore you write a single word, understand who you\'re writing for. Are they beginners or experts? What\'s their background?\n\n## Use Clear Structure\n\n1. Start with the big picture\n2. Break down complex concepts\n3. Use examples and analogies\n4. Provide actionable takeaways\n\n## Write Like You Speak\n\nAvoid jargon when possible. If you must use technical terms, define them clearly.\n\n## Test Your Content\n\nHave someone from your target audience read your draft. Their feedback is invaluable.\n\nRemember: the goal is understanding, not showing off your vocabulary!'
+          video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          thumbnail_url: 'https://images.pexels.com/photos/1183992/pexels-photo-1183992.jpeg?auto=compress&cs=tinysrgb&w=800',
+          duration: 1800
         },
-        tier_required: 'free',
+        tier_required: 'supporter',
         is_published: true,
-        view_count: 1567,
-        like_count: 89,
-        comment_count: 31,
-        tags: ['writing', 'education', 'communication', 'tips'],
-        created_at: '2024-06-19T13:20:00Z'
+        view_count: 1987,
+        like_count: 156,
+        comment_count: 34,
+        tags: ['digital-art', 'portrait', 'tutorial', 'process'],
+        created_at: '2024-06-20T16:30:00Z'
+      },
+      // Emma's content
+      {
+        id: 'content-emma-1',
+        creator_id: 'creator-9999-9999-9999-999999999999',
+        title: 'Mastering French Pastry: Croissant Technique',
+        description: 'Professional techniques for making perfect croissants at home',
+        content_type: 'video',
+        content_data: {
+          video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          thumbnail_url: 'https://images.pexels.com/photos/1775043/pexels-photo-1775043.jpeg?auto=compress&cs=tinysrgb&w=800',
+          duration: 2400
+        },
+        tier_required: 'supporter',
+        is_published: true,
+        view_count: 2345,
+        like_count: 198,
+        comment_count: 56,
+        tags: ['cooking', 'pastry', 'french', 'technique'],
+        created_at: '2024-06-19T11:00:00Z'
       }
     ]
 
@@ -357,7 +581,7 @@ export const createFakeData = async () => {
       }
     }
 
-    // 5. Create proposals for governance
+    // 6. Create proposals for governance
     const fakeProposals = [
       {
         id: 'proposal-1',
@@ -366,8 +590,8 @@ export const createFakeData = async () => {
         description: 'Proposal to reduce the platform fee from 10% to 8% to better support creators, especially those just starting out. This would increase creator earnings while maintaining platform sustainability.',
         proposal_type: 'revenue_sharing',
         status: 'voting',
-        votes_for: 1247,
-        votes_against: 234,
+        votes_for: 2847,
+        votes_against: 456,
         voting_deadline: '2024-07-01T23:59:59Z',
         created_at: '2024-06-15T10:00:00Z'
       },
@@ -378,20 +602,20 @@ export const createFakeData = async () => {
         description: 'Establish a mental health support program for creators, including access to counseling services, stress management resources, and community support groups.',
         proposal_type: 'creator_rights',
         status: 'voting',
-        votes_for: 1876,
-        votes_against: 123,
+        votes_for: 3276,
+        votes_against: 234,
         voting_deadline: '2024-06-30T23:59:59Z',
         created_at: '2024-06-10T14:30:00Z'
       },
       {
         id: 'proposal-3',
-        creator_id: 'creator-1111-1111-1111-111111111111',
-        title: 'Enhanced Content Moderation Tools',
-        description: 'Implement AI-assisted content moderation tools while maintaining human oversight to ensure fair and consistent policy enforcement.',
+        creator_id: 'creator-7777-7777-7777-777777777777',
+        title: 'Enhanced Creator Analytics Dashboard',
+        description: 'Implement comprehensive analytics tools to help creators understand their audience, optimize content, and track revenue more effectively.',
         proposal_type: 'platform_policy',
         status: 'passed',
-        votes_for: 2341,
-        votes_against: 456,
+        votes_for: 3891,
+        votes_against: 298,
         voting_deadline: '2024-06-20T23:59:59Z',
         created_at: '2024-06-05T09:15:00Z'
       }
@@ -407,68 +631,21 @@ export const createFakeData = async () => {
       }
     }
 
-    // 6. Create some disputes for the judicial system
-    const fakeDisputes = [
-      {
-        id: 'dispute-1',
-        plaintiff_id: '22222222-2222-2222-2222-222222222222',
-        defendant_id: '44444444-4444-4444-4444-444444444444',
-        title: 'Copyright Infringement Claim',
-        description: 'Claim that content was used without permission in a tutorial video. Seeking resolution and proper attribution.',
-        status: 'under_review',
-        assigned_judge_id: '55555555-5555-5555-5555-555555555555',
-        created_at: '2024-06-18T11:00:00Z'
-      },
-      {
-        id: 'dispute-2',
-        plaintiff_id: '33333333-3333-3333-3333-333333333333',
-        defendant_id: '22222222-2222-2222-2222-222222222222',
-        title: 'Revenue Sharing Dispute',
-        description: 'Disagreement over collaboration revenue split for a joint project. Seeking fair resolution based on contribution.',
-        status: 'resolved',
-        assigned_judge_id: '55555555-5555-5555-5555-555555555555',
-        resolution: 'Revenue split adjusted to 60/40 based on documented contributions and time invested.',
-        created_at: '2024-06-10T15:30:00Z',
-        resolved_at: '2024-06-20T10:15:00Z'
-      }
-    ]
-
-    for (const dispute of fakeDisputes) {
-      const { error } = await supabase
-        .from('disputes')
-        .upsert(dispute, { onConflict: 'id' })
-      
-      if (error) {
-        console.log(`Dispute ${dispute.id} might already exist:`, error.message)
-      }
-    }
-
-    // 7. Create some votes on proposals
-    const fakeVotes = [
-      { user_id: '22222222-2222-2222-2222-222222222222', proposal_id: 'proposal-1', vote_type: 'for' },
-      { user_id: '33333333-3333-3333-3333-333333333333', proposal_id: 'proposal-1', vote_type: 'for' },
-      { user_id: '44444444-4444-4444-4444-444444444444', proposal_id: 'proposal-1', vote_type: 'against' },
-      { user_id: '11111111-1111-1111-1111-111111111111', proposal_id: 'proposal-2', vote_type: 'for' },
-      { user_id: '22222222-2222-2222-2222-222222222222', proposal_id: 'proposal-2', vote_type: 'for' },
-      { user_id: '44444444-4444-4444-4444-444444444444', proposal_id: 'proposal-2', vote_type: 'for' }
-    ]
-
-    for (const vote of fakeVotes) {
-      const { error } = await supabase
-        .from('votes')
-        .insert(vote)
-      
-      if (error && !error.message.includes('duplicate')) {
-        console.log(`Vote might already exist:`, error.message)
-      }
-    }
-
-    // 8. Create election votes
+    // 7. Create election votes for all creators
     const fakeElections = [
+      // Votes for Sarah
       { candidate_id: 'creator-1111-1111-1111-111111111111', voter_id: '22222222-2222-2222-2222-222222222222' },
       { candidate_id: 'creator-1111-1111-1111-111111111111', voter_id: '44444444-4444-4444-4444-444444444444' },
-      { candidate_id: 'creator-3333-3333-3333-333333333333', voter_id: '11111111-1111-1111-1111-111111111111' },
-      { candidate_id: 'creator-3333-3333-3333-333333333333', voter_id: '22222222-2222-2222-2222-222222222222' }
+      { candidate_id: 'creator-1111-1111-1111-111111111111', voter_id: '99999999-9999-9999-9999-999999999999' },
+      // Votes for Luna
+      { candidate_id: 'creator-3333-3333-3333-333333333333', voter_id: '77777777-7777-7777-7777-777777777777' },
+      { candidate_id: 'creator-3333-3333-3333-333333333333', voter_id: '88888888-8888-8888-8888-888888888888' },
+      // Votes for Alex
+      { candidate_id: 'creator-7777-7777-7777-777777777777', voter_id: '11111111-1111-1111-1111-111111111111' },
+      { candidate_id: 'creator-7777-7777-7777-777777777777', voter_id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' },
+      // Votes for Maya
+      { candidate_id: 'creator-8888-8888-8888-888888888888', voter_id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' },
+      { candidate_id: 'creator-8888-8888-8888-888888888888', voter_id: 'cccccccc-cccc-cccc-cccc-cccccccccccc' }
     ]
 
     for (const election of fakeElections) {
@@ -481,125 +658,42 @@ export const createFakeData = async () => {
       }
     }
 
-    // 9. Create some comments
-    const fakeComments = [
-      {
-        content_id: 'content-sarah-1',
-        user_id: '22222222-2222-2222-2222-222222222222',
-        comment_text: 'Great insights on UI trends! The point about sustainable design really resonates with me.',
-        like_count: 12
-      },
-      {
-        content_id: 'content-sarah-1',
-        user_id: '33333333-3333-3333-3333-333333333333',
-        comment_text: 'Love the focus on accessibility. It\'s about time this became a priority!',
-        like_count: 8
-      },
-      {
-        content_id: 'content-marcus-1',
-        user_id: '11111111-1111-1111-1111-111111111111',
-        comment_text: 'Perfect tutorial for beginners! Your explanation style is so clear.',
-        like_count: 15
-      },
-      {
-        content_id: 'content-luna-1',
-        user_id: '44444444-4444-4444-4444-444444444444',
-        comment_text: 'This song is absolutely beautiful! The lyrics really speak to me.',
-        like_count: 23
-      }
-    ]
-
-    for (const comment of fakeComments) {
-      const { error } = await supabase
-        .from('comments')
-        .insert(comment)
-      
-      if (error) {
-        console.log(`Comment might already exist:`, error.message)
-      }
-    }
-
-    // 10. Create some content likes
-    const fakeContentLikes = [
-      { content_id: 'content-sarah-1', user_id: '22222222-2222-2222-2222-222222222222' },
-      { content_id: 'content-sarah-1', user_id: '33333333-3333-3333-3333-333333333333' },
-      { content_id: 'content-sarah-1', user_id: '44444444-4444-4444-4444-444444444444' },
-      { content_id: 'content-marcus-1', user_id: '11111111-1111-1111-1111-111111111111' },
-      { content_id: 'content-marcus-1', user_id: '33333333-3333-3333-3333-333333333333' },
-      { content_id: 'content-luna-1', user_id: '11111111-1111-1111-1111-111111111111' },
-      { content_id: 'content-luna-1', user_id: '22222222-2222-2222-2222-222222222222' },
-      { content_id: 'content-luna-1', user_id: '44444444-4444-4444-4444-444444444444' }
-    ]
-
-    for (const like of fakeContentLikes) {
-      const { error } = await supabase
-        .from('content_likes')
-        .insert(like)
-      
-      if (error && !error.message.includes('duplicate')) {
-        console.log(`Content like might already exist:`, error.message)
-      }
-    }
-
-    // 11. Create some subscriptions
-    const fakeSubscriptions = [
-      {
-        user_id: '22222222-2222-2222-2222-222222222222',
-        creator_id: 'creator-1111-1111-1111-111111111111',
-        tier_id: 'tier-sarah-supporter',
-        status: 'active'
-      },
-      {
-        user_id: '44444444-4444-4444-4444-444444444444',
-        creator_id: 'creator-3333-3333-3333-333333333333',
-        tier_id: 'tier-luna-supporter',
-        status: 'active'
-      },
-      {
-        user_id: '11111111-1111-1111-1111-111111111111',
-        creator_id: 'creator-2222-2222-2222-222222222222',
-        tier_id: 'tier-marcus-premium',
-        status: 'active'
-      }
-    ]
-
-    for (const subscription of fakeSubscriptions) {
-      const { error } = await supabase
-        .from('subscriptions')
-        .insert(subscription)
-      
-      if (error && !error.message.includes('duplicate')) {
-        console.log(`Subscription might already exist:`, error.message)
-      }
-    }
-
-    // 12. Create some creator earnings
+    // 8. Create creator earnings data
     const fakeEarnings = [
       {
         creator_id: 'creator-1111-1111-1111-111111111111',
-        amount: 500.00,
+        amount: 1250.00,
         currency: 'USD',
         transaction_type: 'subscription',
-        platform_fee: 50.00,
-        net_amount: 450.00,
-        processed_at: '2024-06-01T00:00:00Z'
-      },
-      {
-        creator_id: 'creator-2222-2222-2222-222222222222',
-        amount: 750.00,
-        currency: 'USD',
-        transaction_type: 'subscription',
-        platform_fee: 75.00,
-        net_amount: 675.00,
+        platform_fee: 125.00,
+        net_amount: 1125.00,
         processed_at: '2024-06-01T00:00:00Z'
       },
       {
         creator_id: 'creator-3333-3333-3333-333333333333',
-        amount: 1200.00,
+        amount: 2100.00,
         currency: 'USD',
         transaction_type: 'subscription',
-        platform_fee: 120.00,
-        net_amount: 1080.00,
+        platform_fee: 210.00,
+        net_amount: 1890.00,
+        processed_at: '2024-06-01T00:00:00Z'
+      },
+      {
+        creator_id: 'creator-7777-7777-7777-777777777777',
+        amount: 890.00,
+        currency: 'USD',
+        transaction_type: 'subscription',
+        platform_fee: 89.00,
+        net_amount: 801.00,
+        processed_at: '2024-06-01T00:00:00Z'
+      },
+      {
+        creator_id: 'creator-8888-8888-8888-888888888888',
+        amount: 675.00,
+        currency: 'USD',
+        transaction_type: 'subscription',
+        platform_fee: 67.50,
+        net_amount: 607.50,
         processed_at: '2024-06-01T00:00:00Z'
       }
     ]
@@ -614,8 +708,8 @@ export const createFakeData = async () => {
       }
     }
 
-    console.log('✅ Fake data creation completed!')
-    return { success: true, message: 'All fake data has been created successfully!' }
+    console.log('✅ Comprehensive fake data creation completed!')
+    return { success: true, message: 'All fake data has been created successfully! Your presentation now has extensive creators and disputes data.' }
 
   } catch (error) {
     console.error('Error creating fake data:', error)

@@ -51,9 +51,6 @@ export function Header() {
               <Link to="/governance" className="hover:text-gold-300 transition-colors">
                 Governance
               </Link>
-              <Link to="/proposals" className="hover:text-gold-300 transition-colors">
-                Proposals
-              </Link>
               <Link to="/disputes" className="hover:text-gold-300 transition-colors">
                 Disputes
               </Link>

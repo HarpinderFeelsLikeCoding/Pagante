@@ -10,6 +10,8 @@ import { Governance } from './pages/Governance'
 import { CreatorDashboard } from './pages/CreatorDashboard'
 import { CreatorProfile } from './pages/CreatorProfile'
 import { Discover } from './pages/Discover'
+import { Creators } from './pages/Creators'
+import { Disputes } from './pages/Disputes'
 import { DemoData } from './pages/DemoData'
 
 function App() {
@@ -27,7 +29,9 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/discover" element={<Discover />} />
+              <Route path="/creators" element={<Creators />} />
               <Route path="/governance" element={<Governance />} />
+              <Route path="/disputes" element={<Disputes />} />
               <Route path="/dashboard" element={<CreatorDashboard />} />
               <Route path="/creator/:username" element={<CreatorProfile />} />
               <Route path="/demo-data" element={<DemoData />} />
