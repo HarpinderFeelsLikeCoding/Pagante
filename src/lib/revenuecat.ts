@@ -38,11 +38,26 @@ class RevenueCatService {
       apiKey: import.meta.env.VITE_REVENUECAT_API_KEY || '',
       environment: import.meta.env.NODE_ENV === 'production' ? 'production' : 'sandbox'
     }
+    
+    // Log configuration status (without exposing the actual key)
+    console.log('RevenueCat Configuration:', {
+      hasApiKey: !!this.config.apiKey,
+      environment: this.config.environment,
+      keyPrefix: this.config.apiKey ? this.config.apiKey.substring(0, 8) + '...' : 'NOT_SET'
+    })
   }
 
   async initialize(userId: string): Promise<void> {
     if (!this.config.apiKey) {
-      console.warn('RevenueCat API key not found. Subscription features will be limited.')
+      console.warn('RevenueCat API key not found. Using mock implementation for demo.')
+      console.warn('To enable real RevenueCat integration:')
+      console.warn('1. Add VITE_REVENUECAT_API_KEY to your .env file')
+      console.warn('2. Set the environment variable in Netlify dashboard')
+      console.warn('3. Configure your RevenueCat app and products')
+      
+      // Continue with mock implementation
+      this.isInitialized = true
+      await this.setUserId(userId)
       return
     }
 
@@ -136,6 +151,10 @@ class RevenueCatService {
       
       // In a real implementation, you would call RevenueCat's purchase method
       // This would handle the payment flow through the app store or web payments
+      
+      if (!this.config.apiKey) {
+        console.log('Using mock purchase for demo (no API key provided)')
+      }
       
       // Mock successful purchase for demo
       const mockResult: PurchaseResult = {

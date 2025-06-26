@@ -1,0 +1,17 @@
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Environment variables for Netlify deployment
+# Note: You'll need to set these in Netlify's dashboard under Site settings > Environment variables
+# VITE_SUPABASE_URL = "your_supabase_url"
+# VITE_SUPABASE_ANON_KEY = "your_supabase_anon_key"
+# VITE_REVENUECAT_API_KEY = "your_revenuecat_api_key"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
