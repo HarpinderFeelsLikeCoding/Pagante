@@ -19,7 +19,7 @@ export function GovernanceBranches() {
     {
       name: 'Legislative',
       icon: Users,
-      color: 'from-blue-500 to-blue-600',
+      color: 'from-royal-500 to-royal-600',
       description: 'Elected creators representing the community',
       responsibilities: [
         'Propose and vote on platform policies',
@@ -32,7 +32,7 @@ export function GovernanceBranches() {
     {
       name: 'Judicial',
       icon: Scale,
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-yellow-500 to-royal-500',
       description: 'Legal experts ensuring fair dispute resolution',
       responsibilities: [
         'Resolve disputes between creators and users',
@@ -62,9 +62,9 @@ export function GovernanceBranches() {
             return (
               <div
                 key={branch.name}
-                className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+                className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
               >
-                <div className={`bg-gradient-to-r ${branch.color} p-6`}>
+                <div className={`bg-gradient-to-r ${branch.color} p-6 group-hover:scale-105 transition-transform duration-300`}>
                   <div className="flex items-center justify-center w-16 h-16 bg-white rounded-full mx-auto mb-4">
                     <IconComponent className="w-8 h-8 text-gray-900" />
                   </div>
@@ -84,7 +84,7 @@ export function GovernanceBranches() {
                     <ul className="space-y-2">
                       {branch.responsibilities.map((responsibility, idx) => (
                         <li key={idx} className="flex items-start space-x-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
+                          <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2 flex-shrink-0" />
                           <span className="text-gray-700 text-sm">{responsibility}</span>
                         </li>
                       ))}
@@ -107,7 +107,7 @@ export function GovernanceBranches() {
 
         <div className="mt-12 bg-white rounded-xl shadow-lg p-8">
           <div className="text-center">
-            <Vote className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+            <Vote className="w-12 h-12 text-royal-600 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
               Checks and Balances System
             </h3>

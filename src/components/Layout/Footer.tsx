@@ -3,12 +3,12 @@ import { Shield, Heart, Users, Scale, Crown } from 'lucide-react'
 
 export function Footer() {
   return (
-    <footer className="bg-navy-900 text-white">
+    <footer className="bg-royal-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <Shield className="w-6 h-6 text-gold-400" />
+              <Shield className="w-6 h-6 text-yellow-400" />
               <span className="text-lg font-bold">Pagante</span>
             </div>
             <p className="text-gray-300 text-sm">
@@ -24,11 +24,11 @@ export function Footer() {
                 <span>Executive</span>
               </li>
               <li className="flex items-center space-x-2">
-                <Users className="w-4 h-4 text-blue-500" />
+                <Users className="w-4 h-4 text-royal-500" />
                 <span>Legislative</span>
               </li>
               <li className="flex items-center space-x-2">
-                <Scale className="w-4 h-4 text-purple-500" />
+                <Scale className="w-4 h-4 text-yellow-500" />
                 <span>Judicial</span>
               </li>
             </ul>

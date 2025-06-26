@@ -12,11 +12,11 @@ export function Header() {
       case 'admin':
         return <Crown className="w-5 h-5 text-yellow-500" />
       case 'elected_creator':
-        return <Users className="w-5 h-5 text-blue-500" />
+        return <Users className="w-5 h-5 text-royal-500" />
       case 'judge':
-        return <Scale className="w-5 h-5 text-purple-500" />
+        return <Scale className="w-5 h-5 text-yellow-500" />
       case 'creator':
-        return <User className="w-5 h-5 text-green-500" />
+        return <User className="w-5 h-5 text-royal-500" />
       default:
         return <Shield className="w-5 h-5 text-gray-500" />
     }
@@ -32,26 +32,26 @@ export function Header() {
   }
 
   return (
-    <header className="bg-gradient-to-r from-navy-900 to-navy-800 text-white shadow-lg">
+    <header className="bg-gradient-to-r from-royal-900 to-royal-800 text-white shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
             <Link to="/" className="flex items-center space-x-2">
-              <Shield className="w-8 h-8 text-gold-400" />
+              <Shield className="w-8 h-8 text-yellow-400" />
               <span className="text-xl font-bold">Pagante</span>
             </Link>
             <nav className="hidden md:flex space-x-6">
-              <Link to="/discover" className="flex items-center space-x-1 hover:text-gold-300 transition-colors">
+              <Link to="/discover" className="flex items-center space-x-1 hover:text-yellow-300 transition-colors">
                 <Compass className="w-4 h-4" />
                 <span>Discover</span>
               </Link>
-              <Link to="/creators" className="hover:text-gold-300 transition-colors">
+              <Link to="/creators" className="hover:text-yellow-300 transition-colors">
                 Creators
               </Link>
-              <Link to="/governance" className="hover:text-gold-300 transition-colors">
+              <Link to="/governance" className="hover:text-yellow-300 transition-colors">
                 Governance
               </Link>
-              <Link to="/disputes" className="hover:text-gold-300 transition-colors">
+              <Link to="/disputes" className="hover:text-yellow-300 transition-colors">
                 Disputes
               </Link>
             </nav>
@@ -60,12 +60,12 @@ export function Header() {
           <div className="flex items-center space-x-4">
             {/* Only show loading spinner during active operations */}
             {loading && profile ? (
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gold-400"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-400"></div>
             ) : profile ? (
               <>
                 <Link
                   to="/dashboard"
-                  className="flex items-center space-x-2 hover:text-gold-300 transition-colors"
+                  className="flex items-center space-x-2 hover:text-yellow-300 transition-colors"
                 >
                   <BarChart className="w-5 h-5" />
                   <span className="hidden sm:inline">Dashboard</span>
@@ -75,7 +75,7 @@ export function Header() {
                 {profile.role === 'admin' && (
                   <Link
                     to="/demo-data"
-                    className="flex items-center space-x-2 hover:text-gold-300 transition-colors"
+                    className="flex items-center space-x-2 hover:text-yellow-300 transition-colors"
                   >
                     <Database className="w-5 h-5" />
                     <span className="hidden sm:inline">Demo Data</span>
@@ -98,13 +98,13 @@ export function Header() {
               <div className="space-x-2">
                 <Link
                   to="/login"
-                  className="text-white hover:text-gold-300 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-gold-600 hover:bg-gold-700 text-white px-3 py-2 rounded-md text-sm font-medium"
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Sign Up
                 </Link>

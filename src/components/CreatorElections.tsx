@@ -61,11 +61,11 @@ export function CreatorElections() {
   const totalVotes = candidates.reduce((sum, candidate) => sum + candidate.votes, 0)
 
   return (
-    <div className="py-16 bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="py-16 bg-gradient-to-br from-royal-50 to-yellow-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
-            <Vote className="w-12 h-12 text-blue-600" />
+            <Vote className="w-12 h-12 text-royal-600" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
             Creator Congressional Elections
@@ -95,8 +95,8 @@ export function CreatorElections() {
             return (
               <div
                 key={candidate.id}
-                className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer ${
-                  isSelected ? 'ring-4 ring-blue-500' : ''
+                className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer group ${
+                  isSelected ? 'ring-4 ring-royal-500' : ''
                 }`}
                 onClick={() => setSelectedCandidate(candidate.id)}
               >
@@ -121,11 +121,11 @@ export function CreatorElections() {
                           <h3 className="text-xl font-bold text-gray-900">
                             {candidate.name}
                           </h3>
-                          <p className="text-blue-600 font-medium">
+                          <p className="text-royal-600 font-medium">
                             {candidate.username}
                           </p>
                           <div className="flex items-center space-x-2 mt-1">
-                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                            <span className="bg-royal-100 text-royal-800 text-xs px-2 py-1 rounded-full">
                               {candidate.category}
                             </span>
                             <div className="flex items-center space-x-1">
@@ -142,7 +142,7 @@ export function CreatorElections() {
                             {candidate.votes.toLocaleString()}
                           </div>
                           <div className="text-sm text-gray-600">votes</div>
-                          <div className="text-sm text-blue-600 font-medium">
+                          <div className="text-sm text-royal-600 font-medium">
                             {votePercentage.toFixed(1)}%
                           </div>
                         </div>
@@ -157,7 +157,7 @@ export function CreatorElections() {
                       <div className="mt-4">
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            className="bg-gradient-to-r from-royal-500 to-yellow-500 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${votePercentage}%` }}
                           />
                         </div>
@@ -170,8 +170,8 @@ export function CreatorElections() {
                   <button
                     className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
                       isSelected
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white text-blue-600 border border-blue-600 hover:bg-blue-50'
+                        ? 'bg-royal-600 text-white'
+                        : 'bg-white text-royal-600 border border-royal-600 hover:bg-royal-50'
                     }`}
                   >
                     {isSelected ? 'Selected' : 'Vote for ' + candidate.name}
@@ -183,7 +183,7 @@ export function CreatorElections() {
         </div>
 
         <div className="mt-12 text-center">
-          <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg">
+          <button className="bg-gradient-to-r from-royal-600 to-yellow-600 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:from-royal-700 hover:to-yellow-700 transition-all duration-300 shadow-lg transform hover:scale-105">
             Cast Your Vote
           </button>
           <p className="mt-4 text-gray-600 text-sm">
