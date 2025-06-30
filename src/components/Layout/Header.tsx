@@ -32,26 +32,56 @@ export function Header() {
   }
 
   return (
-    <header className="bg-gradient-to-r from-royal-900 to-royal-800 text-white shadow-lg">
+    <header className="bg-gradient-to-r from-royal-900 to-royal-800 text-white shadow-2xl border-b-4 border-yellow-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
-            <Link to="/" className="flex items-center space-x-2">
-              <Shield className="w-8 h-8 text-yellow-400" />
-              <span className="text-xl font-bold">Pagante</span>
+            <Link to="/" className="flex items-center space-x-3 group">
+              {/* Logo Image */}
+              <div className="relative">
+                <img 
+                  src="/black_circle_360x360.png" 
+                  alt="Pagante Logo" 
+                  className="w-10 h-10 rounded-full shadow-lg group-hover:scale-110 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 rounded-full bg-yellow-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+              
+              {/* Brand Name */}
+              <div className="flex items-center space-x-2">
+                <span className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-300 bg-clip-text text-transparent group-hover:from-yellow-300 group-hover:to-yellow-200 transition-all duration-300">
+                  Pagante
+                </span>
+                <div className="hidden sm:block bg-yellow-400/20 px-2 py-1 rounded-full">
+                  <span className="text-xs font-medium text-yellow-300">BETA</span>
+                </div>
+              </div>
             </Link>
-            <nav className="hidden md:flex space-x-6">
-              <Link to="/discover" className="flex items-center space-x-1 hover:text-yellow-300 transition-colors">
-                <Compass className="w-4 h-4" />
-                <span>Discover</span>
+            
+            <nav className="hidden md:flex space-x-6 ml-8">
+              <Link 
+                to="/discover" 
+                className="flex items-center space-x-1 hover:text-yellow-300 transition-colors duration-300 group"
+              >
+                <Compass className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+                <span className="font-medium">Discover</span>
               </Link>
-              <Link to="/creators" className="hover:text-yellow-300 transition-colors">
+              <Link 
+                to="/creators" 
+                className="hover:text-yellow-300 transition-colors duration-300 font-medium hover:scale-105 transform transition-transform"
+              >
                 Creators
               </Link>
-              <Link to="/governance" className="hover:text-yellow-300 transition-colors">
+              <Link 
+                to="/governance" 
+                className="hover:text-yellow-300 transition-colors duration-300 font-medium hover:scale-105 transform transition-transform"
+              >
                 Governance
               </Link>
-              <Link to="/disputes" className="hover:text-yellow-300 transition-colors">
+              <Link 
+                to="/disputes" 
+                className="hover:text-yellow-300 transition-colors duration-300 font-medium hover:scale-105 transform transition-transform"
+              >
                 Disputes
               </Link>
             </nav>
@@ -65,30 +95,31 @@ export function Header() {
               <>
                 <Link
                   to="/dashboard"
-                  className="flex items-center space-x-2 hover:text-yellow-300 transition-colors"
+                  className="flex items-center space-x-2 hover:text-yellow-300 transition-colors duration-300 group"
                 >
-                  <BarChart className="w-5 h-5" />
-                  <span className="hidden sm:inline">Dashboard</span>
+                  <BarChart className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                  <span className="hidden sm:inline font-medium">Dashboard</span>
                 </Link>
                 
                 {/* Admin Demo Data Link */}
                 {profile.role === 'admin' && (
                   <Link
                     to="/demo-data"
-                    className="flex items-center space-x-2 hover:text-yellow-300 transition-colors"
+                    className="flex items-center space-x-2 hover:text-yellow-300 transition-colors duration-300 group"
                   >
-                    <Database className="w-5 h-5" />
-                    <span className="hidden sm:inline">Demo Data</span>
+                    <Database className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="hidden sm:inline font-medium">Demo Data</span>
                   </Link>
                 )}
                 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 bg-royal-800/50 rounded-lg px-3 py-2 border border-yellow-400/30">
                   {getBranchIcon(profile.role)}
-                  <span className="text-sm font-medium">{profile.username}</span>
+                  <span className="text-sm font-medium text-yellow-200">{profile.username}</span>
                 </div>
+                
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center space-x-1 bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                  className="flex items-center space-x-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   <LogOut className="w-4 h-4" />
                   <span className="hidden sm:inline">Sign Out</span>
@@ -98,13 +129,13 @@ export function Header() {
               <div className="space-x-2">
                 <Link
                   to="/login"
-                  className="text-white hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-white hover:text-yellow-300 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-royal-700/50"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-md text-sm font-medium"
+                  className="bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   Sign Up
                 </Link>
